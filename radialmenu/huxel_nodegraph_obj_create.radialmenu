@@ -1,0 +1,46 @@
+{
+	"fileversion":"20.5.304",
+	"name":"huxel_nodegraph_obj_create",
+	"categories":"Standard",
+	"pane":"network",
+	"label":"Huxel - Nodegraph - OBJ _create_",
+	"type":"submenu",
+	"items":{
+		"0":{
+			"label":"Box",
+			"type":"script_action",
+			"icon":"SOP_box",
+			"script":"radialmenu.runShelfTool(kwargs, 'sop_box')"
+		},
+		"1":{
+			"label":"Line",
+			"type":"script_action",
+			"icon":"SOP_line",
+			"script":"radialmenu.runShelfTool(kwargs, 'geometry_line')"
+		},
+		"2":{
+			"label":"Sphere",
+			"type":"script_action",
+			"icon":"SOP_sphere",
+			"script":"radialmenu.runShelfTool(kwargs, 'geometry_sphere')"
+		},
+		"4":{
+			"label":"Null",
+			"type":"script_action",
+			"icon":"OBJ_null",
+			"script":"radialmenu.runShelfTool(kwargs, 'object_null')"
+		},
+		"6":{
+			"label":"Load File",
+			"type":"script_action",
+			"icon":"SOP_file",
+			"script":"start_directory = hou.getenv(\"JOB\") + \"/Scenes\"\n\nselected_file = hou.ui.selectFile(start_directory=start_directory, file_type=hou.fileType.Hip)\nif selected_file:\n    hou.hipFile.load(selected_file)"
+		},
+		"7":{
+			"label":"Circle",
+			"type":"script_action",
+			"icon":"SOP_circle",
+			"script":"radialmenu.runShelfTool(kwargs, 'geometry_circle')"
+		}
+	}
+}

@@ -1,0 +1,10 @@
+{
+	"fileversion":"20.5.304",
+	"name":"empty",
+	"categories":"Standard",
+	"pane":"network",
+	"label":"empty",
+	"type":"submenu",
+	"items":{
+	}
+}

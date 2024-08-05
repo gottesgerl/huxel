@@ -1,0 +1,16 @@
+{
+	"fileversion":"20.5.304",
+	"name":"huxel_nodegraph_sop_attribdelete",
+	"categories":"Standard",
+	"pane":"network",
+	"label":"Huxel - Nodegraph - SOP - attribdelete",
+	"type":"submenu",
+	"items":{
+		"4":{
+			"label":"OUT",
+			"type":"script_action",
+			"icon":"OBJ_null",
+			"script":"radialmenu.runShelfTool(kwargs, 'OUT')"
+		}
+	}
+}

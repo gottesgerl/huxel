@@ -1,0 +1,15 @@
+{
+	"env": [
+		{
+			"HUXEL": "C:/Users/Administrator/Documents/houdini20.5/plugins/huxel"
+		},
+		{
+			"HOUDINI_PYTHONWARNINGS": "ignore"
+		},
+		{
+			"PYTHONPATH": "$HUXEL/scripts/python",
+		},
+	],
+	"path": "$HUXEL"
+	
+}

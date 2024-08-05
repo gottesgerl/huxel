@@ -1,0 +1,16 @@
+{
+	"fileversion":"20.5.304",
+	"name":"huxel_nodegraph_sop_sphere",
+	"categories":"Standard",
+	"pane":"network",
+	"label":"Huxel - Nodegraph - SOP - sphere",
+	"type":"submenu",
+	"items":{
+		"0":{
+			"label":"Subdivide",
+			"type":"script_action",
+			"icon":"SOP_subdivide",
+			"script":"radialmenu.runShelfTool(kwargs, 'sop_subdivide')"
+		}
+	}
+}

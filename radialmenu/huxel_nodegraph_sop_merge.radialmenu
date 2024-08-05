@@ -1,0 +1,23 @@
+{
+	"fileversion":"20.5.304",
+	"name":"huxel_nodegraph_sop_merge",
+	"categories":"Standard",
+	"pane":"network",
+	"label":"Huxel - Nodegraph - SOP - merge",
+	"type":"submenu",
+	"items":{
+		"4":{
+			"label":"Attribute Wrangle",
+			"type":"script_action",
+			"icon":"SOP_attribwrangle",
+			"script":"radialmenu.runShelfTool(kwargs, 'sop_attribwrangle')"
+		},
+		"6":{
+			"label":"convert to SWITCH",
+			"shortcut":"D",
+			"type":"script_action",
+			"icon":"SOP_switch",
+			"script":"# Collect pane info\ndesktop = hou.ui.curDesktop()\np = hou.ui.paneUnderCursor()\npp = p.currentTab()\ncur_radialmenu = hou.ui.radialMenu(\"hg_node_merge\")\n#print(cur_radialmenu.position())\n\n# Get closest node\ncp = pp.cursorPosition(confine_to_view=False)\ncp_screen = pp.posToScreen(cp)\npane_size = pp.size()\npath = pp.pwd().path()\n\npos1 = hou.Vector2(0,0)\npos2 = hou.Vector2(pane_size[0], pane_size[1])\nallItems = pp.networkItemsInBox(pos1, pos2, for_drop=\"False\", for_select=\"False\")\nallNodes = [ i[0] for i in allItems if i[1]=='node']\nallDistances = { i:i.position().distanceTo(cp) for i in allNodes }\nnodesByDistance = {k: v for k, v in sorted(allDistances.items(), key=lambda item: item[1])}\nnodes = list(nodesByDistance.keys())\nnode = nodes[0]\n\nswitch = node.parent().createNode('switch')\nfor i in node.inputs(): switch.setNextInput(i)    \nswitch.setPosition(node.position())\nswitch.setDisplayFlag(1)\nswitch.setSelected(1)\nnode.destroy()\n\n\n"
+		}
+	}
+}

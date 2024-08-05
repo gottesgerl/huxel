@@ -1,0 +1,52 @@
+{
+	"fileversion":"20.5.304",
+	"name":"huxel_sceneviewer_settings",
+	"categories":"Standard",
+	"pane":"scene",
+	"label":"0__Huxel SceneViewer Settings",
+	"type":"submenu",
+	"items":{
+		"0":{
+			"label":"World",
+			"shortcut":"W",
+			"type":"script_action",
+			"icon":"VIEW_show_all",
+			"script":"desktop = hou.ui.curDesktop()\n#scene_viewer = hou.ui.paneTabOfType(hou.paneTabType.SceneViewer)\nscene_viewer = desktop.paneTabUnderCursor()\npane_name = scene_viewer.fullName()\nhou.hscript(\"vieweroption -a 1 %s\" %pane_name)\n"
+		},
+		"1":{
+			"label":"BG",
+			"shortcut":"Q",
+			"type":"script_action",
+			"icon":"VIEW_display_background",
+			"script":"desktop = hou.ui.curDesktop()\nscene_viewer = desktop.paneTabUnderCursor()\nviewport = scene_viewer.curViewport()\nviewport_settings = viewport.settings()\ncur_value = viewport_settings.displayBackgroundImage()\nviewport_settings.setDisplayBackgroundImage(abs(cur_value-1)) "
+		},
+		"2":{
+			"label":"Grid",
+			"shortcut":"A",
+			"type":"script_action",
+			"icon":"SOP_grid",
+			"script":"desktop = hou.ui.curDesktop()\nscene_viewer = desktop.paneTabUnderCursor()\ngrid = scene_viewer.referencePlane()\ncur_state = grid.isVisible()\ngrid.setIsVisible(1-cur_state)"
+		},
+		"3":{
+			"label":"Env",
+			"shortcut":"Z",
+			"type":"script_action",
+			"icon":"VIEW_display_background",
+			"script":"desktop = hou.ui.curDesktop()\nscene_viewer = desktop.paneTabUnderCursor()\nviewport = scene_viewer.curViewport()\nviewport_settings = viewport.settings()\ncur_value = viewport_settings.displayEnvironmentBackgroundImage()\nviewport_settings.setDisplayEnvironmentBackgroundImage(abs(cur_value-1)) "
+		},
+		"4":{
+			"label":"Local",
+			"shortcut":"X",
+			"type":"script_action",
+			"icon":"VIEW_show_one",
+			"script":"desktop = hou.ui.curDesktop()\n#scene_viewer = hou.ui.paneTabOfType(hou.paneTabType.SceneViewer)\nscene_viewer = desktop.paneTabUnderCursor()\npane_name = scene_viewer.fullName()\nhou.hscript(\"vieweroption -a 0 %s\" %pane_name)\n"
+		},
+		"6":{
+			"label":"Color",
+			"shortcut":"D",
+			"type":"script_action",
+			"icon":"BUTTONS_set_framerange",
+			"script":"desktop = hou.ui.curDesktop()\nscene_viewer = desktop.paneTabUnderCursor()\nviewport = scene_viewer.curViewport()\nviewport_settings = viewport.settings()\ncur_color_scheme = viewport_settings.colorScheme()\nif (cur_color_scheme == hou.viewportColorScheme.Light):\n    next_color_scheme = hou.viewportColorScheme.Dark\nelse: next_color_scheme = hou.viewportColorScheme.Light\n\nviewport_settings.setColorScheme(next_color_scheme)"
+		}
+	}
+}

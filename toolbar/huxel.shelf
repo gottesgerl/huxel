@@ -1,0 +1,189 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<shelfDocument>
+  <!-- This file contains definitions of shelves, toolbars, and tools.
+ It should not be hand-edited when it is being used by the application.
+ Note, that two definitions of the same element are not allowed in
+ a single file. -->
+
+  <toolshelf name="huxel" label="Huxel">
+    <memberTool name="show_radialMenu"/>
+    <memberTool name="Toogle Update Mode"/>
+    <memberTool name="toogle_updates_on_mouse_up"/>
+    <memberTool name="simulations_toogle"/>
+    <memberTool name="cook_houdini"/>
+    <memberTool name="toogle batches"/>
+  </toolshelf>
+
+  <tool name="show_radialMenu" label="Radial Menu" icon="BUTTONS_radialset">
+    <script scriptType="python"><![CDATA[desktop = hou.ui.curDesktop()
+p = hou.ui.paneUnderCursor()
+parm = kwargs
+
+try: 
+    pp = p.currentTab()
+    panetype = pp.type()
+
+    if (panetype.name() == "SceneViewer"):
+        pp.displayRadialMenu("huxel_sceneviewer_main")
+    elif (panetype.name() == "NetworkEditor"):
+        pp.displayRadialMenu("huxel_nodegraph_main")
+    elif (panetype.name() == "Parm"):
+        pp.displayRadialMenu("huxel_parametereditor_main")
+    elif (panetype.name() == "DetailsView"):
+        pp.displayRadialMenu("huxel_geospreadsheet_main")
+    else:
+        pp.displayRadialMenu("huxel_general_main")
+        #print(panetype.name())
+except: 
+    hou.ui.setStatusMessage("No Pane Under Cursor.", hou.severityType.ImportantMessage)]]></script>
+  </tool>
+
+  <tool name="Toogle Update Mode" label="Update Mode Toogle" icon="BUTTONS_cook">
+    <script scriptType="python"><![CDATA[#####################
+#
+#       Toogle Cooking Mode
+#   by Hannes Gerl, 2022.mar.7
+#       v0.1
+#
+#   Toggles the Cooking Update Mode
+#   from AutoUpdate to Manual
+#   and visa versa
+#
+#   hotkey: radial menu <M> North
+#       icon: PLASMA_App (None)
+#       context: None
+#
+verbose = 0
+
+cur_state = hou.updateModeSetting()
+
+if (str(cur_state) == "updateMode.Manual"):
+    hou.setUpdateMode(hou.updateMode.AutoUpdate)
+    hou.updateModeSetting()
+    if verbose: print("Switched to AutoUpdate.\tON")
+else:
+    hou.setUpdateMode(hou.updateMode.Manual)
+    hou.updateModeSetting()
+    if verbose: print("Switched to Manual.\tOFF")
+]]></script>
+  </tool>
+
+  <tool name="toogle_updates_on_mouse_up" label="Update Mode Toogle Mouse Up" icon="BUTTONS_cook">
+    <script scriptType="python"><![CDATA[#####################
+#
+#   Toogle On Mouse Up Cooking Mode
+#   by Hannes Gerl, 2022.oct.31
+#   v0.1
+#
+#   Toogle the Cooking Update Mode
+#   between On Mouse Up and Manual
+#
+#   hotkey: Shift+F2
+#       icon: PLASMA_App (None)
+#       context: None
+#
+
+verbose = 0
+
+cur_state = hou.updateModeSetting()
+
+if (str(cur_state) == "updateMode.Manual"):
+    hou.setUpdateMode(hou.updateMode.OnMouseUp)
+    hou.updateModeSetting()
+    if verbose: print("Switched to OnMouseUp.\tON")
+else:
+    hou.setUpdateMode(hou.updateMode.Manual)
+    hou.updateModeSetting()
+    if verbose: print("Switched to Manual.\tOFF")
+]]></script>
+  </tool>
+
+  <tool name="toogle batches" label="toogle batches" icon="BUTTONS_comment_out">
+    <script scriptType="python"><![CDATA[#####################
+#
+#      TOOGLE BATCH
+#   by Hannes Gerl, 2022.oct.27
+#       v0.1
+#
+#   Script that toogles node batches visibility on/off
+#
+#   hotkey: None
+#       icon: PLASMA_App (None)
+#       context: None
+#
+
+
+
+import hou
+
+
+verbose=0
+sel = hou.selectedNodes()
+
+
+for s in sel:
+    #geting the current state
+    cur_state = s.isDisplayDescriptiveNameFlagSet()
+    new_state = abs(cur_state-1)
+    
+    s.setDisplayDescriptiveNameFlag(new_state)
+    
+    message = ["off", "on"]
+
+    if verbose: print("%s badges turned %s." %(s, message[new_state]))   
+
+
+
+]]></script>
+  </tool>
+
+  <tool name="simulations_toogle" label="Sim Toogle" icon="BUTTONS_resimulate">
+    <script scriptType="python"><![CDATA[#####################
+#
+#       Toogle Simulation Mode
+#   by Hannes Gerl, 2024.mar.19
+#       v0.1
+#
+#   Toggles the Simulation Update Mode
+#
+#   hotkey: radial menu <M> North East
+#       icon: PLASMA_App (None)
+#       context: None
+#
+
+verbose = 0
+
+cur_state = hou.simulationEnabled()
+
+if (cur_state == 0):
+    hou.setSimulationEnabled(1)
+    #hou.updateModeSetting()
+    if verbose: print("Switched to Simulations.\tON")
+else:
+    hou.setSimulationEnabled(0)
+    hou.updateModeSetting()
+    if verbose: print("Switched to Simulations.\tOFF")
+]]></script>
+  </tool>
+
+  <tool name="cook_houdini" label="Cook" icon="BUTTONS_cook2">
+    <script scriptType="python"><![CDATA[#####################
+#
+#      COOK Houdini
+#   by Hannes Gerl, 2024.mar.19
+#       v0.1
+#
+#   Script that toogles node shapes and colors 
+#   to (de)mark of being present for visual purposes only
+#
+#   hotkey: None
+#       icon: PLASMA_App (None)
+#       context: None
+#
+
+
+
+import hou
+hou.ui.triggerUpdate()]]></script>
+  </tool>
+</shelfDocument>

@@ -1,0 +1,22 @@
+{
+	"fileversion":"20.5.304",
+	"name":"huxel_geospreadsheet_main",
+	"categories":"Standard",
+	"pane":"network",
+	"label":"Huxel - Geo Spreadsheet - __main__",
+	"type":"submenu",
+	"items":{
+		"0":{
+			"label":"Pts | Prims",
+			"type":"script_action",
+			"icon":"SOP_splitpoints",
+			"script":"desktop = hou.ui.curDesktop()\np = hou.ui.paneUnderCursor()\npp = p.currentTab()\npanetype = pp.type()\n\ncurAttr = pp.attribType().name()\n\nif curAttr == \"Point\":\n    pp.setAttribType(hou.attribType.Prim)\nelse:\n    pp.setAttribType(hou.attribType.Point)\n    "
+		},
+		"4":{
+			"label":"Particle Attr Filter",
+			"type":"script_action",
+			"icon":"IMAGE_filter_color_teal",
+			"script":"desktop = hou.ui.curDesktop()\np = hou.ui.paneUnderCursor()\npp = p.currentTab()\npanetype = pp.type()\n\ncurFilter = pp.attribFilter()\n\nfilterString = \"v age life id pscale Cd\"\n\nif curFilter != \"\":\n    pp.setAttribFilter(\"\")\nelse:\n    pp.setAttribFilter(filterString)\n    "
+		}
+	}
+}

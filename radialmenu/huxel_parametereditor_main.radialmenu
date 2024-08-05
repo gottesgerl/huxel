@@ -1,0 +1,22 @@
+{
+	"fileversion":"20.5.304",
+	"name":"huxel_parametereditor_main",
+	"categories":"Standard",
+	"pane":"network",
+	"label":"Huxel - ParameterEditor - __main__",
+	"type":"submenu",
+	"items":{
+		"0":{
+			"label":"NON-Default",
+			"type":"script_action",
+			"icon":"MISC_python",
+			"script":"\ndesktop = hou.ui.curDesktop()\np = hou.ui.paneUnderCursor()\npp = p.currentTab()\nmode = pp.filterEnabled()\n\nif mode == 0:\n    pp.setFilterEnabled(1)\n    pp.setFilterMode(hou.parmFilterMode.GraphSelectedParms)\nelse:\n    pp.setFilterEnabled(0)\n    pp.setFilterMode(hou.parmFilterMode.AllParms)\n"
+		},
+		"4":{
+			"label":"Test",
+			"type":"script_action",
+			"icon":"MISC_python",
+			"script":"desktop = hou.ui.curDesktop()\np = hou.ui.paneUnderCursor()\npp = p.currentTab()\nparms = kwargs\nprint(parms)"
+		}
+	}
+}

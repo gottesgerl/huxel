@@ -1,0 +1,9 @@
+{
+	"fileversion":"20.5.304",
+	"name":"huxel_nodegraph_test",
+	"categories":"Standard",
+	"pane":"network",
+	"label":"Huxel - Nodegraph - test (dyn)",
+	"type":"script_submenu",
+	"script":""
+}

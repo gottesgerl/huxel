@@ -1,0 +1,58 @@
+{
+	"fileversion":"20.5.304",
+	"name":"huxel_sceneviewer_create",
+	"categories":"Standard",
+	"pane":"scene",
+	"label":"0__Huxel SceneViewer Create",
+	"type":"submenu",
+	"items":{
+		"0":{
+			"label":"Box",
+			"type":"script_action",
+			"icon":"SOP_box",
+			"script":"radialmenu.runShelfTool(kwargs, 'sop_box')"
+		},
+		"1":{
+			"label":"Line",
+			"type":"script_action",
+			"icon":"SOP_line",
+			"script":"radialmenu.runShelfTool(kwargs, 'geometry_line')"
+		},
+		"2":{
+			"label":"Sphere",
+			"type":"script_action",
+			"icon":"SOP_sphere",
+			"script":"radialmenu.runShelfTool(kwargs, 'geometry_sphere')"
+		},
+		"3":{
+			"label":"Platonic Solids",
+			"type":"script_action",
+			"icon":"SOP_platonic",
+			"script":"radialmenu.runShelfTool(kwargs, 'geometry_platonic')"
+		},
+		"4":{
+			"label":"Null",
+			"type":"script_action",
+			"icon":"OBJ_null",
+			"script":"radialmenu.runShelfTool(kwargs, 'object_null')"
+		},
+		"5":{
+			"label":"Curve Bezier",
+			"type":"script_action",
+			"icon":"SOP_curve",
+			"script":"radialmenu.runShelfTool(kwargs, 'sop_curve::2.0_bezier')"
+		},
+		"6":{
+			"label":"File",
+			"type":"script_action",
+			"icon":"SOP_file",
+			"script":"radialmenu.runShelfTool(kwargs, 'geometry_file')"
+		},
+		"7":{
+			"label":"Circle",
+			"type":"script_action",
+			"icon":"SOP_circle",
+			"script":"radialmenu.runShelfTool(kwargs, 'geometry_circle')"
+		}
+	}
+}

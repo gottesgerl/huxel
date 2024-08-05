@@ -1,0 +1,9 @@
+{
+	"fileversion":"20.5.304",
+	"name":"huxel_sceneviewer_lights",
+	"categories":"Standard",
+	"pane":"scene",
+	"label":"0__Huxel SceneViewer Lights",
+	"type":"script_submenu",
+	"script":"########################################################\n#\n#       huxel sceneviewer lights\n#\n#       builds a radialmenu based on the lights in the scene\n#\n#######################################################     \n\nimport huxelradialmenus.commontools as commontools\nimport huxelradialmenus.sceneviewer.sceneviewertools as viewertools\n\nverbose = 0\nmax_lights = 7\n\nslots = ( \"n\", \"nw\", \"ne\", \"w\", \"sw\", \"s\", \"se\", \"e\")\n\nshortcuts = commontools.shortcutMap()\nkwargs = commontools.paneinfo()\ncamera = hou.node(kwargs['camera_path'])\narea_lights, dome_lights = viewertools.getAllLights(**kwargs)\n\n\n# EAST -- \"dome lights\" ---------------------------------------------\n# \"New Dome light\" to next open field\ndome_lights = None\nif not dome_lights:\n    cmd = (\"viewertools.newDomeLightMenu(%s)\" %(kwargs))\n    menu[\"e\"] = {\n            \"type\": \"script_action\",\n            \"label\": \"New Dome light\",\n            \"icon\": \"OBJ_camera\",\n            \"script\": cmd,\n            \"shortcut\": \"D\"         }\n\n#radialmenu.setRadialMenu(menu)\nhou.ui.injectRadialMenu(\"huxel_sceneviewer_lights_temp_menu\")"
+}

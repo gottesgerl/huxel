@@ -1,0 +1,9 @@
+{
+	"fileversion":"20.5.304",
+	"name":"huxel_nodegraph_json",
+	"categories":"Standard",
+	"pane":"network",
+	"label":"Huxel - Nodegraph - JSON",
+	"type":"script_submenu",
+	"script":"import json\nimport huxelradialmenus.commontools as commontools\n\nhuxelpath = hou.getenv(\"Huxel\")\nfile = huxelpath+\"/scripts/python/huxelradialmenus/SOP/merge/merge.json\"\n\n\n# Fill the cardinal directions (N, S, E, W) first, then the diagonals\nslots = (\"sw\", \"se\", \"s\", \"w\", \"e\", \"nw\", \"ne\", \"n\")\n\n# Get closest node\nnode, nodetype, distance, parent, context, presets = commontools.getClosestNode()\n\nmenu = {}\n\nwith open(file, \"r\") as json_file:\n    input = json.load(json_file)\n    \n    for dir, values in input.items():\n        menu[dir] = {}\n        for value in values:\n            for k, v in value.items():\n                menu[dir][k]=v\n\n\n    \n# Add static elements\n#\n#menu[\"s\"]= {\n#        \"type\": \"script_action\",\n#        \"label\": \"NEXT: Attribwrangle\",\n#        \"icon\": \"SOP_attribwrangle\",\n#        \"script\": createAttribWrangleFunc(),    }\n#    \n\n        \nradialmenu.setRadialMenu(menu)\n\n"
+}

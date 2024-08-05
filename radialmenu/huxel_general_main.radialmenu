@@ -1,0 +1,22 @@
+{
+	"fileversion":"20.5.304",
+	"name":"huxel_general_main",
+	"categories":"Standard",
+	"pane":"network",
+	"label":"Huxel - General - __main__",
+	"type":"submenu",
+	"items":{
+		"0":{
+			"label":"Yeeehaaaww!",
+			"type":"script_action",
+			"icon":"MISC_python",
+			"script":"print(\"YEEEHAAAW!\")"
+		},
+		"6":{
+			"label":"Load File",
+			"type":"script_action",
+			"icon":"SOP_file",
+			"script":"start_directory = hou.getenv(\"JOB\") + \"/Scenes\"\n\nselected_file = hou.ui.selectFile(start_directory=start_directory, file_type=hou.fileType.Hip)\nif selected_file:\n    hou.hipFile.load(selected_file)"
+		}
+	}
+}

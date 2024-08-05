@@ -1,0 +1,22 @@
+{
+	
+	"n": [
+			{
+			"type": "script_action",
+			"label": "NEXT: Attribwrangle",
+			"icon": "SOP_attribwrangle",
+			"script": "commontools.createNode(nodetype='attribwrangle', **kwargs)"
+			}
+		],
+	
+	"e": [
+			{
+			"type":	"script_action",
+			"label": "to Switch",
+			"icon": "SOP_switch",
+			"script": "module.convertToSwitch(kwargs)",
+			"shortcut": "D"
+			}
+		]
+
+}
