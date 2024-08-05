@@ -1,2 +1,2 @@
-# Houdini Huxel
-An UX plugin for Houdini which adds extra mouse options and radial menus aimed at speeding up everday day tasks.
+## Houdini Huxel
+An UX plugin for Houdini which adds mouse inputs and radial menus aimed to speed up everday day tasks.
