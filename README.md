@@ -27,3 +27,6 @@ Adding the huxel shelf:
 
 Assigning an hotkey to the onekey radial menu:
 ![1__install_onekey_hotkey](https://github.com/user-attachments/assets/7f9a256c-816d-471d-bc47-d1699c523646)
+
+## 4 | Legal Notice
+This software is provided AS-IS, with absolutely no warranty of any kind, express or otherwise. We disclaim any liability for damages resulting from using this software.
