@@ -29,6 +29,5 @@ Assigning an hotkey to the onekey radial menu:
 ![1__install_onekey_hotkey](https://github.com/user-attachments/assets/7f9a256c-816d-471d-bc47-d1699c523646)
 
 ## 4 | Legal Notice
-This software is provided without any warranty whatsoever. 
-We disclaim any liability for damages resulting from using this software.
-Use it at your own risk.
+The software is provided "as is", without warranty oy any kind, express or implied, including but not limited to the warranties of merchantability, fitness for a particular purpose and noninfringement. In no event shall the authors or copyright holders be liable for any claim, damages or other liability, wether in an action of contract, tort or otherwise, arising from, out of or in connection with the software or the use or other dealings in the software.
+
