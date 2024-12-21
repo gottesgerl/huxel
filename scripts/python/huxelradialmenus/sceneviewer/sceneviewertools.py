@@ -59,11 +59,16 @@ def getDownstreamNodes(node):
     
 
 def getCameras(kwargs):
+    max_cams = 1
+    
     desktop = hou.ui.curDesktop()
     editor = desktop.findPaneTab(kwargs["panetab"])
     viewertype = kwargs["viewertype"]
     path = editor.pwd()
     cams=[]
+    huxel_cams=[None] * 3
+    found_huxel_cams = False
+    
     #LOPS
     if viewertype == "stage":         
         displayedNode = path.displayNode()
@@ -83,7 +88,14 @@ def getCameras(kwargs):
         obj_category = hou.nodeTypeCategories()["Object"]
         nodetype = hou.nodeType(obj_category, "cam")
         cams.extend(nodetype.instances())
-    return cams
+        for c in cams:
+            if (c.parm("huxel_maincam")):
+                slot = c.parm("huxel_maincam").eval()
+                if slot>=0:   
+                    huxel_cams[slot] = c
+                    found_huxel_cams = True
+    if found_huxel_cams:    return huxel_cams
+    else:                   return cams[:max_cams]
 
 def newCamera(kwargs):
     desktop = hou.ui.curDesktop()

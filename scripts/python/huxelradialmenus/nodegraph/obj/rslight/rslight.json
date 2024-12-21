@@ -1,0 +1,32 @@
+{
+	
+	"n": [
+			{
+			"type": "script_action",
+			"label": "LOOK THROUGH",
+			"icon": "VIEW_viewmemory",
+			"script": "module.lookThroughCamera(**kwargs)",
+			"shortcut": "W"
+			}
+		],
+
+	"s": [
+			{
+			"type":	"script_action",
+			"label": "LOCK Parameter",
+			"icon": "BUTTONS_lock_badge",
+			"script": "module.lockCameraXformToggle(**kwargs)",
+			"shortcut": "X"
+			}
+		],
+	"w": [
+			{
+			"type": "script_action",
+			"label": "LOOK`n`LOCK",
+			"icon": "TOOLS_view_mode_camera",
+			"script": "module.lookAndLock(**kwargs)",
+			"shortcut": "A"
+			}
+		]
+
+}

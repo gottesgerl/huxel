@@ -5,17 +5,16 @@
 			"type": "script_action",
 			"label": "LOOK THROUGH",
 			"icon": "VIEW_viewmemory",
-			"script": "viewertools.lookThroughCamera(**kwargs)",
+			"script": "module.lookThroughCamera(**kwargs)",
 			"shortcut": "W"
 			}
 		],
-	
 	"e": [
 			{
-			"type":	"script_action",
-			"label": "SELECT",
-			"icon": "SCENEGRAPH_selectable_on",
-			"script": "viewertools.selectCamera(**kwargs)",
+			"type": "script_action",
+			"label": "Set MAINCam",
+			"icon": "OBJ_camera",
+			"script": "module.setHuxelMainCam(0, **kwargs)",
 			"shortcut": "D"
 			}
 		],
@@ -24,16 +23,16 @@
 			"type":	"script_action",
 			"label": "LOCK Parameter",
 			"icon": "BUTTONS_lock_badge",
-			"script": "viewertools.lockCameraXformToggle(**kwargs)",
+			"script": "module.lockCameraXformToggle(**kwargs)",
 			"shortcut": "X"
 			}
 		],
 	"w": [
 			{
 			"type": "script_action",
-			"label": "UN|LOCK",
+			"label": "LOOK`n`LOCK",
 			"icon": "TOOLS_view_mode_camera",
-			"script": "viewertools.lockCameraViewToggle(**kwargs)",
+			"script": "module.lookAndLock(**kwargs)",
 			"shortcut": "A"
 			}
 		]

@@ -1,0 +1,39 @@
+{
+
+	"n": [
+			{
+			"type":	"script_action",
+			"label": "Obj Merge (New Object)",
+			"icon": "BUTTONS_up",
+			"script": "module.create_objmerge_in_new_geo(**kwargs)",
+			"shortcut": "W"
+			}
+		],
+	"e": [
+			{
+			"type": "script_action",
+			"label": "Python Editor",
+			"icon": "SOP_python",
+			"script": "commontools.useRecipe(name='Sop/null::Administrator::1_python_editor', type='NodePreset', **kwargs)",
+			"shortcut": "D"
+			}
+		],
+	"s": [
+			{
+			"type": "script_action",
+			"label": "Obj Merge",
+			"icon": "BUTTONS_down",
+			"script": "module.create_objmerge(**kwargs)",
+			"shortcut": "X"
+			}
+		],
+	"w": [
+			{
+			"type": "script_action",
+			"label": "Geo Info",
+			"icon": "SOP_matchsize",
+			"script": "commontools.useRecipe(name='Sop/null::Administrator::2_geo_infos', type='NodePreset', **kwargs)",			
+			"shortcut": "A"
+			}
+		]
+}

@@ -1,0 +1,52 @@
+{
+	"fileversion":"20.0.625",
+	"name":"hg_radial_network_view",
+	"categories":"Standard",
+	"pane":"network",
+	"label":"HANNES Network View",
+	"type":"submenu",
+	"items":{
+		"0":{
+			"label":"NOTE",
+			"type":"script_action",
+			"icon":"BUTTONS_match_case",
+			"script":"sel = hou.selectedItems()\ndesktop = hou.ui.curDesktop()\npane = hou.ui.paneUnderCursor()\npp = pane.currentTab()\ncp = pp.cursorPosition(confine_to_view=False)\nwidth = 3\nheight = 1.5\ntextSize = 0.85\n\np = pp.pwd()    \nnew_box = p.createStickyNote()\nnew_box.setColor(hou.Color(0.576, 0.208, 0.457))\nnew_box.setDrawBackground(0)\nnew_box.setTextColor(hou.Color(1, 0.75, 0))\nnew_box.setTextSize(textSize)\nnew_box.setText(\"Lorem\")\nnew_box.setPosition(hou.Vector2(cp[0],cp[1]))\nnew_box.setSize(hou.Vector2(width,height))\n\n    "
+		},
+		"1":{
+			"label":"Sim",
+			"type":"script_action",
+			"icon":"BUTTONS_resimulate",
+			"script":"radialmenu.runShelfTool(kwargs, 'simulations_toogle')"
+		},
+		"2":{
+			"label":"Sel LOCAL",
+			"type":"script_action",
+			"icon":"SOP_each",
+			"script":"#####################\n#\n#       SELECT ALL LOCAL\n#   by Hannes Gerl, 2022.mar.03\n#       v0.1\n#\n#   returns all nodes of the same type (instances)\n#   in the local sop context#   \n#\n#   hotkey: None\n#       icon: SOP_each\n#       context: None\n#\n\nimport hou\n\nlocal=1\nverbose=2\n\n\nsel = hou.selectedNodes()\nall_instances = []\n\n\nfor s in sel:\n    cur_type = s.type()    \n    cur_instances = cur_type.instances()\n    #print(\"S:%s  cur_type:%s   instances:%s\\n\" %(s,cur_type,cur_instances))\n    for i in cur_instances:\n        if local: \n            if i in s.parent().children():\n                i.setSelected(1)\n                if verbose>1: print(\"%s\" %i)\n        else: \n            i.setSelected(1)\n            if verbose>1: print(\"%s\" %i.path())\n    #all_instances.expand(cur_instances)\n\n    \nif verbose: print(\"%s nodes selected.\" %len(hou.selectedNodes()))\n    \n    \n\n\n"
+		},
+		"3":{
+			"label":"MANUAL",
+			"type":"script_action",
+			"icon":"SOP_polyreduce-2.0",
+			"script":"#####################\n#\n#      MANUAL EDITS MODE\n#       by Hannes Gerl, 2023.mar.23\n#       v0.1\n#\n#   Script that toogles node shapes and colors \n#   to (de)mark of manual changes\n#\n#   hotkey: None\n#       icon: PLASMA_App (None)\n#       context: None\n#\n\n\n\nimport hou\n\nvis_color = hou.Color(1, 0, 0)\nvis_shape = \"null\"\n\nverbose=0\n\n\nsel = hou.selectedNodes()\ncounter_vis = 0\ncounter_devis = 0\n\nfor s in sel:\n    #geting the current state\n    cur_color = s.color()\n    cur_shape = s.userData(\"nodeshape\")\n\n\n    #setting back to default color and shape\n    if (cur_color == vis_color) and (cur_shape == vis_shape):\n        counter_devis += 1\n        default_color = s.type().defaultColor()\n        default_shape = s.type().defaultShape()\n        s.setColor(default_color)\n        s.setUserData(\"nodeshape\", default_shape)\n        \n    #setting to vis_color and vis_shape \n    else:\n        counter_vis += 1\n        s.setColor(vis_color)\n        s.setUserData(\"nodeshape\", vis_shape)\n\n\nif verbose: print(\"%s nodes switched to manual edits mode.\\t%s nodes switched back\" %(counter_vis, counter_devis))    \n\n\n\n"
+		},
+		"4":{
+			"label":"NETWORK Box",
+			"type":"script_action",
+			"icon":"SOP_polysoup",
+			"script":"sel = hou.selectedItems()\ndesktop = hou.ui.curDesktop()\npane = hou.ui.paneUnderCursor()\npp = pane.currentTab()\ncp = pp.cursorPosition(confine_to_view=False)\nnew_boxes = []\npos_x = 0\n\nwidth = 5\nheight = 10\ngap = .33\n\nif not sel:\n    p = pp.pwd()    \n    new_box = p.createNetworkBox()\n    new_box.setColor(s.color())\n    new_box.setPosition(hou.Vector2(cp[0],cp[1]-height))\n    new_box.setSize(hou.Vector2(width,height))\n    hou.setSelected(1)\nelse: \n    for s in sel: \n        p = s.parent()\n        new_box = p.createNetworkBox()\n        new_box.setColor(s.color())\n        new_box.setPosition(s.position())\n        new_box.move(hou.Vector2(s.size()[0]+gap,0))\n        new_box.setSize(s.size())\n        new_boxes.append(new_box)\n        new_box.setSelected(1)\n        s.setSelected(0)\n"
+		},
+		"5":{
+			"label":"Batches",
+			"type":"script_action",
+			"icon":"BUTTONS_comment_out",
+			"script":"#####################\n#\n#      TOOGLE BATCH\n#   by Hannes Gerl, 2022.oct.27\n#       v0.1\n#\n#   Script that toogles node batches visibility on/off\n#\n#   hotkey: None\n#       icon: PLASMA_App (None)\n#       context: None\n#\n\n\n\nimport hou\n\n\nverbose=0\nsel = hou.selectedNodes()\n\n\nfor s in sel:\n    #geting the current state\n    cur_state = s.isDisplayDescriptiveNameFlagSet()\n    new_state = abs(cur_state-1)\n    \n    s.setDisplayDescriptiveNameFlag(new_state)\n    \n    message = [\"off\", \"on\"]\n\n    if verbose: print(\"%s badges turned %s.\" %(s, message[new_state]))   \n\n\n\n"
+		},
+		"7":{
+			"label":"VIEW",
+			"type":"script_action",
+			"icon":"VIEW_visualization",
+			"script":"#####################\n#\n#      VISUALIZER MODE\n#   by Hannes Gerl, 2022.mar.07\n#       v0.1\n#\n#   Script that toogles node shapes and colors \n#   to (de)mark of being present for visual purposes only\n#\n#   hotkey: None\n#       icon: PLASMA_App (None)\n#       context: None\n#\n\n\n\nimport hou\n\nvis_color = hou.Color(0.094, 0.369, 0.69)\nvis_shape = \"ciircle_1TinyA\"\n\nverbose=0\n\n\nsel = hou.selectedNodes()\ncounter_vis = 0\ncounter_devis = 0\n\nfor s in sel:\n    #geting the current state\n    cur_color = s.color()\n    cur_shape = s.userData(\"nodeshape\")\n\n\n    #setting back to default color and shape\n    if (cur_color == vis_color) and (cur_shape == vis_shape):\n        counter_devis += 1\n        default_color = s.type().defaultColor()\n        default_shape = s.type().defaultShape()\n        s.setColor(default_color)\n        s.setUserData(\"nodeshape\", default_shape)\n        \n    #setting to vis_color and vis_shape \n    else:\n        counter_vis += 1\n        s.setColor(vis_color)\n        s.setUserData(\"nodeshape\", vis_shape)\n\n\nif verbose: print(\"%s nodes switched to visualize mode.\\t%s nodes switched back\" %(counter_vis, counter_devis))    \n\n\n\n"
+		}
+	}
+}

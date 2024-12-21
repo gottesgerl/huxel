@@ -1,0 +1,21 @@
+{
+
+	"e": [
+			{
+			"type":	"script_action",
+			"label": "to Sphere",
+			"icon": "SOP_sphere",
+			"script": "module.convertToSphere(**kwargs)",
+			"shortcut": "D"
+			}
+		],
+	"s": [
+			{
+			"type": "script_action",
+			"label": "NEXT: Match Size",
+			"icon": "SOP_matchsize",
+			"script": "commontools.createNode(nodetype='matchsize', **kwargs)",
+			"shortcut": "X"
+			}
+		]
+}

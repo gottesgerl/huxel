@@ -1,0 +1,68 @@
+{
+
+	"n": [
+			{
+			"type":	"script_action",
+			"label": "to meter",
+			"script": "commontools.useRecipe(name='Sop/xform::Administrator::1_to_meter', type='NodePreset', **kwargs)",
+			"shortcut": "W"
+			}
+		],
+	"nw": [
+			{
+			"type":	"script_action",
+			"label": "to centimeter",
+			"script": "commontools.useRecipe(name='Sop/xform::Administrator::2_to_centimeter', type='NodePreset', **kwargs)",
+			"shortcut": "Q"
+			}
+		],
+	"ne": [
+			{
+			"type":	"script_action",
+			"label": "center pivot",
+			"script": "commontools.useRecipe(name='Sop/xform::Administrator::3_center_pivot', type='NodePreset', **kwargs)",
+			"shortcut": "E"
+			}
+		],
+	"w": [
+			{
+			"type":	"script_action",
+			"label": "uni scale only",
+			"script": "commontools.useRecipe(name='Sop/xform::Administrator::5_uni_scale_only', type='NodePreset', **kwargs)",
+			"shortcut": "A"
+			}
+		],
+	"e": [
+			{
+			"type":	"script_action",
+			"label": "on ground",
+			"script": "commontools.useRecipe(name='Sop/xform::Administrator::4_on_ground', type='NodePreset', **kwargs)",
+			"shortcut": "D"
+			}
+		],		
+	"sw": [
+			{
+			"type":	"script_action",
+			"label": "to origin",
+			"script": "commontools.useRecipe(name='Sop/xform::Administrator::6_to_origin', type='NodePreset', **kwargs)",
+			"shortcut": "Z"
+			}
+		],
+	"se": [
+			{
+			"type":	"script_action",
+			"label": "set centroid",
+			"script": "module.setCentroid(**kwargs)",
+			"shortcut": "C"
+			}
+		],		
+	"s": [
+			{
+			"type": "script_action",
+			"label": "NEXT: Null",
+			"icon": "SOP_null",
+			"script": "commontools.createNode(nodetype='null', **kwargs)",
+			"shortcut": "X"
+			}
+		]
+}

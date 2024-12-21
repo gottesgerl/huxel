@@ -86,6 +86,21 @@ def setDisplayFlags(editor, node):
         node.setDisplayFlag(True)
     elif context == "Object":
         node.setDisplayFlag(abs(node.isDisplayFlagSet()-1))
+        
+        
+def bypassToggle(editor, node):
+    # toggle bypass on/off
+    # obj-level: toggle selectable
+    parent = editor.pwd()
+    context = parent.childTypeCategory().name()
+    if context == "Sop":
+        node.bypass(not node.isBypassed())
+    elif context == "Object":
+        node.setSelectableInViewport(not node.isSelectableInViewport())
+        
+def toggleBatches(node):
+    cur_state = node.isDisplayDescriptiveNameFlagSet()
+    node.setDisplayDescriptiveNameFlag(not cur_state)
 
 def storeViewCycle(editor):
     # stores the selected nodes
@@ -101,7 +116,7 @@ def storeViewCycle(editor):
             try:            
                 c = re.sub(r"VIEW [ABC](\n)", "", child.comment())
                 child.setComment(c)
-                if not c: fo.setGenericFlag(hou.nodeFlag.DisplayComment, False)
+                if not c: c.setGenericFlag(hou.nodeFlag.DisplayComment, False)
             except:
                 pass 
     parent.setCachedUserData("view_toggle", selected)        
@@ -127,9 +142,12 @@ def viewCycle(editor):
         msg = "Only one node stored. Please select 2 nodes and store them with Ctrl+Shift+Atl+Doubleclick."
         hou.ui.setStatusMessage(msg, hou.severityType.ImportantMessage)
     else:
-        for n in range(len(cycle_nodes)):
-            if cycle_nodes[n]==displayNode:
-                setDisplayFlags(editor, cycle_nodes[(n+1)%len(cycle_nodes)])
+        if displayNode not in cycle_nodes:
+            setDisplayFlags(editor, cycle_nodes[0])
+        else:                
+            for n in range(len(cycle_nodes)):
+                if cycle_nodes[n]==displayNode:
+                    setDisplayFlags(editor, cycle_nodes[(n+1)%len(cycle_nodes)])
     
 def shadedTemplate(editor, node):
     # toggles shaded template flag
@@ -180,6 +198,18 @@ def handle_SOPnull(editor, node):
         centerNode(editor, target)
         setSelection(editor, target)
 
+def handle_SOPmaterial(editor, node):
+    # Material 
+    # go to dependent nodes
+    try:
+        target = node.parm("shop_materialpath1").evalAsNode().dependents()[1]
+    except: 
+        target = None
+    if target:
+        centerNode(editor, target)
+        setSelection(editor, target)
+
+
 def handle_SOPswitch(uievent, editor, node):
     # SWITCH 
     # switch inputs up and down
@@ -191,11 +221,22 @@ def handle_SOPswitch(uievent, editor, node):
             new_input = (input-1)%(len(node.inputs()))
         node.parm("input").set(new_input)
 
+def create_geo_node(uievent, editor, jump=1):
+    #create a geo node and jumps into
+    newgeo = editor.pwd().createNode("geo")
+    pos = editor.posFromScreen(uievent.mousepos)
+    newgeo.setPosition(pos)
+    if jump: view.changeNetwork(editor, newgeo)
+    
+    
+#-------------------------------------------MOUSE WHEEL functions
+
+
 
 def wheelDiving(uievent, editor, wheel_direction):
     # Move one level up or dive
     # into the node under pointer
-    block_managers = 0
+    block_managers = 1
     if wheel_direction == "up": 
         node = editor.pwd().parent()
         #dont jump too far up
@@ -238,13 +279,13 @@ def wheelNodeScaling(uievent, editor, wheel_direction):
             size = "d"
             step = 1
             
-        if wheel_direction == "up":           
+        if wheel_direction == "down":           
             if size=="s": step -= 1
             elif size=="l": step += 1
             else: size="l"      
             #print("Make Bigger %s --> Size: %s --> Step: %s --> Default Shape: %s" %(nodeshape, size, step, default_shape))            
 
-        elif wheel_direction == "down":    
+        elif wheel_direction == "up":    
             if size=="s": step += 1
             elif size=="l": step -= 1
             else: size="s"            
@@ -282,9 +323,12 @@ class LmbMouseHandler(ng.NodeMouseHandler):
         # to its respective subroutines
         
         editor = uievent.editor
-                
+        parent = editor.pwd()
+        context = parent.childTypeCategory().name()
+           
         if isinstance(uievent, MouseEvent):
             if uievent.selected.item is not None:
+                #print(uievent.selected.name)
                 if uievent.selected.name.startswith('overview'): 
                     return base.OverviewMouseHandler(uievent)
                     
@@ -303,33 +347,31 @@ class LmbMouseHandler(ng.NodeMouseHandler):
                     else:                               max_distance = 2.5
                     
                     nodes = getVisibleNodes(uievent, max_distance)
+                    
+                    
                     if nodes:
                         closest_node = nodes[0]
-                        parent = editor.pwd()
-                        context = parent.childTypeCategory().name()
-                        
-                        # SHIFT --> set selection and display flag    
+
+                        # SHIFT --> set selection
                         if uievent.modifierstate.shift and not uievent.modifierstate.ctrl and not uievent.modifierstate.alt:
-                             if context == "Sop":        
-                                editor.setCurrentNode(closest_node)                        
-                                setDisplayFlags(editor, closest_node)   
+                            setSelection(editor, closest_node)
                                               
                         # SHIFT + CTRL --> cycle stored nodes / add to selection
                         elif uievent.modifierstate.shift and uievent.modifierstate.ctrl and not uievent.modifierstate.alt:
                             if context == "Sop":        viewCycle(editor)
                             if context == "Object":     closest_node.setSelected(True)
                                                                              
-                        # SHIFT + ALT --> nothing
+                        # SHIFT + ALT --> toggle batches
                         elif uievent.modifierstate.shift and not uievent.modifierstate.ctrl and uievent.modifierstate.alt:
-                            pass
+                            toggleBatches(closest_node)
                             
                         # SHIFT + ALT + CTRL --> store view selection
                         elif uievent.modifierstate.shift and uievent.modifierstate.ctrl and uievent.modifierstate.alt:
                             if context == "Sop":        storeViewCycle(editor)
                             
-                        # CTRL ONLY -->  set display flag   
+                        # CTRL ONLY -->  bypass toggle
                         elif uievent.modifierstate.ctrl and not uievent.modifierstate.alt and not uievent.modifierstate.shift:
-                            setDisplayFlags(editor, closest_node)
+                            bypassToggle(editor, closest_node)
                         
                         # ALT --> toogle template flag / remove from selection                 
                         elif uievent.modifierstate.alt and not uievent.modifierstate.ctrl and not uievent.modifierstate.shift:
@@ -340,9 +382,16 @@ class LmbMouseHandler(ng.NodeMouseHandler):
                         elif uievent.modifierstate.alt and uievent.modifierstate.ctrl and not uievent.modifierstate.shift:
                             if context == "Sop":        shadedTemplate(editor, closest_node)
                                                         
-                        # NO MODIFIER --> set selection      
+                        # NO MODIFIER --> set display flag      
                         else:
-                            setSelection(editor, closest_node)
+                            setDisplayFlags(editor, closest_node)
+                    #-------------------------------------------double clicking in EMPTY SPACE                
+                    else:
+                        
+                        # NO MODIFIERS --> create geo   
+                        if not uievent.modifierstate.shift and not uievent.modifierstate.ctrl and not uievent.modifierstate.alt:
+                            if context == "Object":     create_geo_node(uievent, editor)
+                        
 
                             
                            
@@ -360,6 +409,9 @@ class LmbMouseHandler(ng.NodeMouseHandler):
                         
                     if type == hou.nodeType(hou.sopNodeTypeCategory(), "switch"):
                         handle_SOPswitch(uievent, editor, node)
+
+                    if type == hou.nodeType(hou.sopNodeTypeCategory(), "material"):
+                        handle_SOPmaterial(editor, node)
                         
         
         #------------------------------------------- HANDLING OVERLAYS AND SPECIFIC CASES      
@@ -385,11 +437,13 @@ class LmbMouseHandler(ng.NodeMouseHandler):
             elif isinstance(uievent.selected.item, hou.StickyNote):
                 return ng.StickyNoteMouseHandler(uievent)
             elif isinstance(uievent.selected.item, hou.SubnetIndirectInput):
-                return IndirectInputMouseHandler(uievent)
+                return ng.IndirectInputMouseHandler(uievent)
             elif isinstance(uievent.selected.item, hou.NetworkDot):
                 return ng.NetworkDotMouseHandler(uievent)
             elif isinstance(uievent.selected.item, hou.NodeConnection):
-                return ng.NodeConnectionMouseHandler(uievent)
+                #store the current uievent before it gets consumed 
+                last_uievent = uievent  
+                return NodeConnectionMouseHandler_huxel(uievent, last_uievent)
             elif isinstance(uievent.selected.item, NodeDependency):
                 return ng.NodeDependencyMouseHandler(uievent)        
             '''
@@ -419,17 +473,106 @@ class MouseWheelHandler(ng.NodeMouseHandler):
         # distributes wheel events
         # to its respective subroutines        
         editor = uievent.editor
+        
         if isinstance(uievent, MouseEvent):
-            wheel_direction = "down" if uievent.wheelvalue > 0 else "up" if uievent.wheelvalue < 0 else "None"
-            
+            wheel_direction = "down" if uievent.wheelvalue > 0 else "up" if uievent.wheelvalue < 0 else "None"             
             # CTRL --> wheeldiving  
             if not uievent.modifierstate.shift and uievent.modifierstate.ctrl and not uievent.modifierstate.alt:
                 wheelDiving(uievent, editor, wheel_direction)
-            # SHIFT + CTRL --> scale nodeshapes  
+            # SHIFT + CTRL --> scale nodeshapes
             elif uievent.modifierstate.shift and uievent.modifierstate.ctrl and not uievent.modifierstate.alt:
                 wheelNodeScaling(uievent, editor, wheel_direction)
+            # ALT --> nothing  
+            #elif not uievent.modifierstate.shift and not uievent.modifierstate.ctrl and uievent.modifierstate.alt:
+            #    wheelShapeChange(uievent, editor, wheel_direction)
             else:
             # NO MODIFIER --> default behaviour  
                 view.scaleWithMouseWheel(uievent)
-            
-                
+
+
+
+
+#------------------------------------------- MODIFIED CLASSES -------------------------------------------
+
+# original classes are in nodegraph.py                
+# we extend its functionality by adding information of the last event
+class NodeConnectionMouseHandler_huxel(base.ItemEventHandler):
+    def __init__(self, uievent, last_uievent):
+            super(NodeConnectionMouseHandler_huxel, self).__init__(uievent)
+            self.last_uievent = last_uievent
+    def handleEvent(self, uievent, pending_actions):
+        if uievent.selected.name == 'wire':
+            handler = NodeWireMouseHandler_huxel(uievent, self.last_uievent)
+        else:
+            handler = NodeWireStubMouseHandler(uievent)
+        return handler.handleEvent(uievent, pending_actions)
+
+# original classes are in nodegraph.py
+# by this time the original mousedown event has already been consumed
+# thats why we extend its functionality to be able to look back to the last (mousedown) event
+class NodeWireMouseHandler_huxel(base.ItemEventHandler):
+    #added
+    def __init__(self, uievent, last_uievent=None):
+            super(NodeWireMouseHandler_huxel, self).__init__(uievent)
+            self.last_uievent = last_uievent
+    def handleEvent(self, uievent, pending_actions):
+        # Check if the user wants to enter the scroll state.
+        if states.isScrollStateEvent(uievent):
+            return states.ScrollStateHandler(uievent, self)
+        #modified/added start
+        editor = self.last_uievent.editor
+        last_action = self.last_uievent.eventtype
+
+        if uievent.eventtype == 'mouseup' and last_action == 'mousedown':
+            if uievent.modifierstate.alt and self.last_uievent.mousestate.lmb and \
+                utils.supportsNetworkDots(editor.pwd()):
+                #modified/added end
+                with hou.undos.group('Create dot', editor):
+                    dot = editor.pwd().createNetworkDot()
+                    dot.setPosition(editor.posFromScreen(uievent.mousepos))
+                    dot.setInput(self.item.inputItem(),
+                        self.item.inputItemOutputIndex())
+                    self.item.outputItem().setInput(self.item.inputIndex(),
+                        dot, 0)
+                    handler = ng.NetworkDotMoveHandler(self.start_uievent, None)
+                    handler.item = dot
+                    utils.cleanupDisconnectedItems(editor.pwd())
+                    return handler
+
+            elif self.start_uievent.mousestate.rmb:
+                menu = popupmenus.WireContextMenu(uievent, uievent.located.item)
+                result = utils.getPopupMenuResult(menu)
+                result = menu.executeCommand(result)
+                if isinstance(result, base.EventHandler):
+                    return result
+
+                return None
+
+        elif uievent.eventtype == 'mousedrag':
+            handler = None
+            if self.start_uievent.mousestate.lmb:
+                handler = connect.WireConnectHandler(uievent)
+            elif base.isPanEvent(self.start_uievent):
+                handler = base.ViewPanHandler(self.start_uievent)
+            elif base.isScaleEvent(self.start_uievent):
+                handler = base.ViewScaleHandler(self.start_uievent)
+            if handler:
+                return handler.handleEvent(uievent, pending_actions)
+
+        elif uievent.eventtype == 'mouseup':
+            if self.start_uievent.selected.item == uievent.located.item:
+                if self.start_uievent.mousestate.lmb and \
+                     uievent.modifierstate.alt:
+                    handler = connect.WireMenuConnectHandler(
+                                        self.start_uievent,
+                                        [self.item],
+                                        False)
+                    return handler.handleEvent(uievent, pending_actions)
+
+                elif self.start_uievent.mousestate.lmb:
+                    view.modifySelection(uievent, None, [self.item])
+
+            return None
+
+        # Keep handling events until a mouse action is identified.
+        return self

@@ -1,0 +1,66 @@
+{
+	
+	"nw": [
+			{
+			"type": "script_action",
+			"label": "Set 1st Input",
+			"icon": "VIEW_layout_viewport1",
+			"script": "module.setInput(value=0,**kwargs)",  
+			"shortcut": "1"
+			}
+		],
+	"n": [
+			{
+			"type": "script_action",
+			"label": "Set 2nd Input",
+			"icon": "VIEW_layout_viewport2",
+			"script": "module.setInput(value=1, **kwargs)",
+			"shortcut": "2"
+			}
+		],
+	"ne": [
+			{
+			"type": "script_action",
+			"label": "Set 3rd Input",
+			"icon": "VIEW_layout_viewport3",
+			"script": "module.setInput(value=2, **kwargs)",
+			"shortcut": "3"
+			}
+		],
+	"w": [
+			{
+			"type": "script_action",
+			"label": "Switch On Frame",
+			"icon": "IMAGE_diff_frame_current",
+			"script": "commontools.useRecipe(name='Sop/switch::Administrator::Switch_On_Frame', type='NodePreset', **kwargs)",
+			"shortcut": "A"
+			}
+		],
+	"sw": [
+			{
+			"type": "script_action",
+			"label": "Switch Every Nth Frame",
+			"icon": "IMAGE_diff_frame_specific",
+			"script": "commontools.useRecipe(name='Sop/switch::Administrator::Switch_Every_Nth_Frame', type='NodePreset', **kwargs)",
+			"shortcut": "Z"
+			}
+		],
+	"e": [
+			{
+			"type":	"script_action",
+			"label": "to Merges",
+			"icon": "SOP_merge",
+			"script": "commontools.convertNode(nodetype='merge', **kwargs)",
+			"shortcut": "D"
+			}
+		],
+	"s": [
+			{
+			"type": "script_action",
+			"label": "NEXT: Attribwrangle",
+			"icon": "SOP_attribwrangle",
+			"script": "commontools.createNode(nodetype='attribwrangle', **kwargs)",
+			"shortcut": "X"
+			}
+		]
+}

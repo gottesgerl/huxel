@@ -1,0 +1,21 @@
+{
+
+	"e": [
+			{
+			"type":	"script_action",
+			"label": "to Box",
+			"icon": "SOP_box",
+			"script": "module.convertToBox(**kwargs)",
+			"shortcut": "D"
+			}
+		],
+	"s": [
+			{
+			"type": "script_action",
+			"label": "NEXT: Subdivide",
+			"icon": "SOP_subdivide",
+			"script": "commontools.createNode(nodetype='subdivide', **kwargs)",
+			"shortcut": "X"
+			}
+		]
+}

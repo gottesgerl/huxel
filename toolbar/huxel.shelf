@@ -12,6 +12,10 @@
     <memberTool name="simulations_toogle"/>
     <memberTool name="cook_houdini"/>
     <memberTool name="toogle batches"/>
+    <memberTool name="clipboard_to_obj_merge"/>
+    <memberTool name="huxel set Maincam NW"/>
+    <memberTool name="huxel set Maincam N"/>
+    <memberTool name="huxel set Maincam NE"/>
   </toolshelf>
 
   <tool name="show_radialMenu" label="Radial Menu" icon="BUTTONS_radialset">
@@ -24,15 +28,15 @@ try:
     panetype = pp.type()
 
     if (panetype.name() == "SceneViewer"):
-        pp.displayRadialMenu("huxel_sceneviewer_main")
+        pp.displayRadialMenu("huxel_sceneviewer_init")
     elif (panetype.name() == "NetworkEditor"):
-        pp.displayRadialMenu("huxel_nodegraph_main")
+        pp.displayRadialMenu("huxel_nodegraph_init")
     elif (panetype.name() == "Parm"):
-        pp.displayRadialMenu("huxel_parametereditor_main")
+        pp.displayRadialMenu("huxel_parametereditor_init")
     elif (panetype.name() == "DetailsView"):
-        pp.displayRadialMenu("huxel_geospreadsheet_main")
+        pp.displayRadialMenu("huxel_geospreadsheet_init")
     else:
-        pp.displayRadialMenu("huxel_general_main")
+        pp.displayRadialMenu("huxel_general_init")
         #print(panetype.name())
 except: 
     hou.ui.setStatusMessage("No Pane Under Cursor.", hou.severityType.ImportantMessage)]]></script>
@@ -109,7 +113,7 @@ else:
 #
 #   hotkey: None
 #       icon: PLASMA_App (None)
-#       context: None
+#       context: Ctrl+Shift+B
 #
 
 
@@ -185,5 +189,157 @@ else:
 
 import hou
 hou.ui.triggerUpdate()]]></script>
+  </tool>
+
+  <tool name="huxel set Maincam N" label="Set Maincam N" icon="OBJ_camera">
+    <script scriptType="python"><![CDATA[import hou
+
+
+def setHuxelMainCam(prio):
+    last_sel = hou.selectedNodes()
+    if not last_sel:        hou.ui.setStatusMessage("Please Select A Camera.", hou.severityType.ImportantMessage)
+    elif last_sel[-1].type().name() != "cam": hou.ui.setStatusMessage("Please make sure last selected object is a camera.", hou.severityType.ImportantMessage)
+    else:
+        cams=[]
+        obj_category = hou.nodeTypeCategories()["Object"]
+        nodetype = hou.nodeType(obj_category, "cam")
+        cams.extend(nodetype.instances())
+        for c in cams:
+            #parameter already exists
+            if (c.parm("huxel_maincam")):
+                slot = c.parm("huxel_maincam").eval()
+            #create parameter
+            else:
+                ptg = c.parmTemplateGroup()
+                parm = hou.IntParmTemplate("huxel_maincam", "Huxel Main Cam", 1, default_value=[-1], min=-1, max=2)
+                ptg.append(parm)
+                c.setParmTemplateGroup(ptg)
+                slot=-1
+            if c==last_sel[-1]:
+                # reset (toggle) if camera was already set to this slot
+                if slot == prio: c.parm("huxel_maincam").set(-1)
+                else: c.parm("huxel_maincam").set(prio)
+            else:
+                if slot == prio:    c.parm("huxel_maincam").set(-1)
+        hou.ui.setStatusMessage("Camera Set.", hou.severityType.Message)
+    
+setHuxelMainCam(0)]]></script>
+  </tool>
+
+  <tool name="huxel set Maincam NW" label="Set Maincam NW" icon="OBJ_camera">
+    <script scriptType="python"><![CDATA[import hou
+
+
+def setHuxelMainCam(prio):
+    last_sel = hou.selectedNodes()
+    if not last_sel:        hou.ui.setStatusMessage("Please Select A Camera. In order to clear a slot, reselect its current cam.", hou.severityType.ImportantMessage)
+    elif last_sel[-1].type().name() != "cam": hou.ui.setStatusMessage("Please make sure last selected object is a camera.", hou.severityType.ImportantMessage)
+    else:
+        cams=[]
+        obj_category = hou.nodeTypeCategories()["Object"]
+        nodetype = hou.nodeType(obj_category, "cam")
+        cams.extend(nodetype.instances())
+        for c in cams:
+            #parameter already exists
+            if (c.parm("huxel_maincam")):
+                slot = c.parm("huxel_maincam").eval()
+            #create parameter
+            else:
+                ptg = c.parmTemplateGroup()
+                parm = hou.IntParmTemplate("huxel_maincam", "Huxel Main Cam", 1, default_value=[-1], min=-1, max=2)
+                ptg.append(parm)
+                c.setParmTemplateGroup(ptg)
+                slot=-1
+            if c==last_sel[-1]:
+                # reset (toggle) if camera was already set to this slot
+                if slot == prio: c.parm("huxel_maincam").set(-1)
+                else: c.parm("huxel_maincam").set(prio)
+            else:
+                if slot == prio:    c.parm("huxel_maincam").set(-1)
+        hou.ui.setStatusMessage("Camera Set.", hou.severityType.Message)
+    
+setHuxelMainCam(1)]]></script>
+  </tool>
+
+  <tool name="huxel set Maincam NE" label="Set Maincam NE" icon="OBJ_camera">
+    <script scriptType="python"><![CDATA[import hou
+
+
+def setHuxelMainCam(prio):
+    last_sel = hou.selectedNodes()
+    if not last_sel:        hou.ui.setStatusMessage("Please Select A Camera.", hou.severityType.ImportantMessage)
+    elif last_sel[-1].type().name() != "cam": hou.ui.setStatusMessage("Please make sure last selected object is a camera.", hou.severityType.ImportantMessage)
+    else:
+        cams=[]
+        obj_category = hou.nodeTypeCategories()["Object"]
+        nodetype = hou.nodeType(obj_category, "cam")
+        cams.extend(nodetype.instances())
+        for c in cams:
+            #parameter already exists
+            if (c.parm("huxel_maincam")):
+                slot = c.parm("huxel_maincam").eval()
+            #create parameter
+            else:
+                ptg = c.parmTemplateGroup()
+                parm = hou.IntParmTemplate("huxel_maincam", "Huxel Main Cam", 1, default_value=[-1], min=-1, max=2)
+                ptg.append(parm)
+                c.setParmTemplateGroup(ptg)
+                slot=-1
+            if c==last_sel[-1]:
+                # reset (toggle) if camera was already set to this slot
+                if slot == prio: c.parm("huxel_maincam").set(-1)
+                else: c.parm("huxel_maincam").set(prio)
+            else:
+                if slot == prio:    c.parm("huxel_maincam").set(-1)
+        hou.ui.setStatusMessage("Camera Set.", hou.severityType.Message)
+    
+setHuxelMainCam(2)]]></script>
+  </tool>
+
+  <tool name="clipboard_to_obj_merge" label="clipboard &gt; obj_merge" icon="SOP_object_merge">
+    <script scriptType="python"><![CDATA[#####################
+#
+#   CLIPBOARD TO OBJECT MERGE
+#   by Hannes Gerl, 2024.sep.20
+#   with help from https://berniebernie.fr/wiki/Houdini_Python
+#   Thank you!
+#   v0.1
+#
+#   Creates Object Merge Nodes based on the current clipboard
+#
+#   hotkey: None
+#       icon: PLASMA_App (None)
+#       context: Ctrl+Shift+B
+#
+
+
+network = hou.ui.curDesktop().paneTabUnderCursor()
+parent = network.pwd().path()
+mouse_pos = network.cursorPosition()
+clipboard = hou.ui.getTextFromClipboard()
+
+prefix = "IN_"
+offset = 0.0
+offset_min = 1
+offset_per_letter = .1
+nodes = []
+
+if clipboard:
+    list = clipboard.split()
+    for item in list:
+        node = hou.node(item)
+        if node != None:
+            obj_merge = hou.node(parent).createNode('object_merge',prefix+node.name())
+            obj_merge.parm('objpath1').set(node.path())
+            obj_merge.setPosition(mouse_pos)
+            obj_merge.move([len(nodes)*offset_min,0])
+            obj_merge.move([offset,0])
+            offset += obj_merge.size()[0]+(len(obj_merge.name())*offset_per_letter)
+            if not len(nodes): obj_merge.setSelected(True, True)
+            else:              obj_merge.setSelected(True, False)
+            obj_merge.setDisplayDescriptiveNameFlag(False)
+            nodes.append(obj_merge)
+            
+if not len(nodes): hou.ui.setStatusMessage("No nodes found in clipboard. Please copy (ctrl+c) a node/nodes to the clipboard first.", hou.severityType.ImportantMessage)]]></script>
   </tool>
 </shelfDocument>

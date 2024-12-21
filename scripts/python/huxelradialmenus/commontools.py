@@ -59,8 +59,14 @@ def getClosestNode():
 
         
 def createNode(nodetype, connect=1, display=1, select=1, good_position=1, **kwargs):
-    node = hou.node("/obj")
+    #creates a node and deals with connections, flags and positions
+    if "path" in kwargs.keys():
+        node = hou.node(kwargs["path"])
+    else: 
+        print("No path found. Taking OBJ-Context instead.")
+        node = hou.node("/obj")
     is_manager = 1 if node.type().category().name() == "Manager" else 0
+    
     if is_manager:   parent = node
     else:            parent = node.parent()
     newnode = parent.createNode(nodetype)
@@ -79,6 +85,74 @@ def createNode(nodetype, connect=1, display=1, select=1, good_position=1, **kwar
     if good_position: newnode.moveToGoodPosition(move_inputs = False, move_outputs = False, move_unconnected = False)
     return newnode
 
+def convertNode(nodetype, connect=1, display=0, select=0, **kwargs):
+    #replaces a given node by a new one with different type
+    node = hou.node(kwargs["path"])
+    parent = node.parent()
+    newnode = node.parent().createNode(nodetype)
+    houversion = hou.applicationVersion()
+    if houversion[0]>=20 and houversion[1]>=5:
+        #hou 20.5 only
+        newnode.setInputsFromData(node.inputsAsData())
+        newnode.setOutputsFromData(node.outputsAsData())
+    else:
+        for i in node.inputs(): newnode.setNextInput(i)
+        for o in node.outputConnections():   o.outputNode().setInput(o.inputIndex(), newnode)
+    newnode.setPosition(node.position())
+    if display: newnode.setDisplayFlag(1)
+    if select: newnode.setSelected(1)
+    node.destroy()
+
+
+def clipboard_to_objmerge(display=0, **kwargs):
+    #creates object_merge-nodes based on the current clipboard
+    network = hou.ui.curDesktop().paneTabUnderCursor()
+    parent = network.pwd().path()
+    mouse_pos = network.cursorPosition()
+    clipboard = hou.ui.getTextFromClipboard()
+    prefix = "IN_"
+    offset = 0.0
+    offset_min = 1
+    offset_per_letter = .1
+    nodes = []
+    if clipboard:
+        list = clipboard.split()
+        for item in list:
+            node = hou.node(item)
+            if node != None:
+                obj_merge = hou.node(parent).createNode('object_merge',prefix+node.name())
+                obj_merge.parm('objpath1').set(node.path())
+                obj_merge.setPosition(mouse_pos)
+                obj_merge.move([len(nodes)*offset_min,0])
+                obj_merge.move([offset,0])
+                offset += obj_merge.size()[0]+(len(obj_merge.name())*offset_per_letter)
+                if not len(nodes): obj_merge.setSelected(True, True)
+                else:              obj_merge.setSelected(True, False)
+                obj_merge.setDisplayDescriptiveNameFlag(False)
+                nodes.append(obj_merge)            
+    if not len(nodes): hou.ui.setStatusMessage("No nodes found in clipboard. Please copy (ctrl+c) a node/nodes to the clipboard first.", hou.severityType.ImportantMessage)
+
+def create_objmerge_in_new_geo(new_geo=False, display=1, connect=0, select=1, good_position=0, hide_badges=1, **kwargs):
+    # creates a new geometry node and jumps into it
+    node = hou.node(kwargs["path"])
+    editor = hou.ui.curDesktop().findPaneTab(kwargs["editor"])    
+    parent = node.parent()    
+    position_offset = hou.Vector2(0,-1)
+    newpos = node.position()+position_offset    
+    if 'OUT' in node.name():    newname = node.name().replace('OUT', 'IN')
+    else:                       newmame = 'IN_'+node.name()
+    #geo node
+    geoname = newname.replace('IN', '')
+    obj_context = hou.node("/obj")
+    #obj merge
+    newgeo = obj_context.createNode("geo", node_name=geoname, force_valid_node_name=True)
+    newgeo.moveToGoodPosition()       
+    newnode = newgeo.createNode("object_merge", node_name=newname, force_valid_node_name=True)
+    newnode.parm("objpath1").set(node.path())
+    if hide_badges:                         newnode.setDisplayDescriptiveNameFlag(False)
+    #jump
+    mouseevents.centerNode(editor, newnode)
+    return newnode
 
 def fullSelectNode(nodepath):
     node = hou.node(nodepath)
@@ -145,6 +219,23 @@ def buildMenuFromJsonFile(nodepath, **kwargs):
                         menu[dir][k]=v
     radialmenu.setRadialMenu(menu)
     return radialmenu
+
+def useRecipe(name, type="NodePreset", **kwargs):
+    node = hou.node(kwargs["path"])
+    hou_preRecipeVersion = int("".join(map(str, hou.applicationVersion())))<205000
+    #Houdini 20.0 and below
+    if hou_preRecipeVersion:
+            presets = hou.hscript("oppresetls %s" %node.path())[0].split("\n")
+            presetname_raw = hou.hda.componentsFromFullNodeTypeName(name)[2]
+            presetname_whitespaces = presetname_raw.replace("_", " ")
+            presetname_formatted = "(%s)%s" %(presetname_whitespaces[0], presetname_whitespaces[1:])
+            if presetname_raw in presets: hou.hscript("oppresetload %s \"%s\"" %(node.path(), presetname_raw))
+            elif presetname_formatted in presets: hou.hscript("oppresetload %s \"%s\"" %(node.path(), presetname_formatted))
+            else: print("Preset %s not found." %name)
+    #Houdini 20.5 and above
+    else:
+        if (type == "NodePreset"):  
+            hou.data.applyNodePresetRecipe(name=name, node=node)
 
 
 

@@ -1,5 +1,5 @@
 {
-	"fileversion":"20.5.304",
+	"fileversion":"20.5.332",
 	"name":"huxel_nodegraph_obj_create",
 	"categories":"Standard",
 	"pane":"network",
@@ -19,16 +19,16 @@
 			"script":"radialmenu.runShelfTool(kwargs, 'geometry_line')"
 		},
 		"2":{
-			"label":"Sphere",
-			"type":"script_action",
-			"icon":"SOP_sphere",
-			"script":"radialmenu.runShelfTool(kwargs, 'geometry_sphere')"
-		},
-		"4":{
 			"label":"Null",
 			"type":"script_action",
 			"icon":"OBJ_null",
 			"script":"radialmenu.runShelfTool(kwargs, 'object_null')"
+		},
+		"4":{
+			"label":"Geo",
+			"type":"script_action",
+			"icon":"OBJ_geo",
+			"script":"import mouseevents\nimport nodegraphview as view\n\njump = True\n\neditor = kwargs['pane']\nnewgeo = editor.pwd().createNode(\"geo\")\nmousepos =  editor.cursorPosition()\npos = editor.posFromScreen(mousepos)\nnewgeo.setPosition(pos)\nif jump: view.changeNetwork(editor, newgeo)"
 		},
 		"6":{
 			"label":"Load File",
