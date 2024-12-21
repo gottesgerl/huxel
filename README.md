@@ -19,7 +19,9 @@ Put the downloaded "huxel.json" file in it.
 Change 			"HUXEL": "C:/Users/Username/Documents/houdini20.5/plugins/huxel"
 so it points to your install path.
 
-Fire up Houdini. 
+Fire up Houdini.
+
+Yehaw!
 
 ## 3 | Shelf
 Adding the huxel shelf: 
