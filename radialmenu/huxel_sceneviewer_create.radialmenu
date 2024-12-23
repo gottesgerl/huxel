@@ -1,0 +1,28 @@
+{
+	"fileversion":"20.0.751",
+	"name":"huxel_sceneviewer_create",
+	"categories":"Standard",
+	"pane":"scene",
+	"label":"0__Huxel SceneViewer Create",
+	"type":"submenu",
+	"items":{
+		"0":{
+			"label":"Grid",
+			"type":"script_action",
+			"icon":"SOP_grid",
+			"script":"import hou\nimport soptoolutils\n\nsize = 10;\nrows = 10;\ncolumns = 10;\n\nkwargs = dict()\nkwargs['bbox'] = hou.BoundingBox(-size/2.0, 0, -size/2.0, size/2.0, 0, size/2.0)\n#skip interactive placement\nkwargs['ctrlclick'] = True\n\n\ngrid = soptoolutils.genericTool(kwargs, 'grid')\n\ngrid.parm(\"rows\").set(rows)\ngrid.parm(\"cols\").set(columns)\n\nhou.ui.setStatusMessage(\"Grid created.\", hou.severityType.Message)\n\n\n"
+		},
+		"4":{
+			"label":"Geometry",
+			"type":"script_action",
+			"icon":"OBJ_geo",
+			"script":"radialmenu.runShelfTool(kwargs, 'object_geo')"
+		},
+		"6":{
+			"label":"Light",
+			"type":"script_action",
+			"icon":"OBJ_light",
+			"script":"import toolutils\npane = toolutils.activePane(kwargs)\n\n# When launched from a scene view, always create a camera that matches\n# the current viewpoint.\nclicktoplace = False\nlock_to_view = 1\n\nimport loptoolutils\nif (loptoolutils.getToolCategoryForPane(pane) == hou.lopNodeTypeCategory()):\n    newnode = loptoolutils.genericCameraLightTool(kwargs, 'light::2.0',\n                'arealight1', clicktoplace, lock_to_view)\n    newnode.parm(\"lighttype\").set('UsdLuxRectLight')\n    loptoolutils.setGoodLightExposure(kwargs, newnode)\n\nelse:\n    import objecttoolutils\n    kwargs['bbox'] = hou.BoundingBox(-0.5, -0.5, 0.0, 0.5, 0.5, 0.0)\n    newnode = objecttoolutils.genericCameraLightTool(kwargs, 'hlight::2.0',\n                'arealight1', clicktoplace, lock_to_view)\n    newnode.parmTuple(\"stdswitcher4\")[0].set(1)\n    newnode.parmTuple(\"atten_folder_1\")[0].set(1)\n    objecttoolutils.setGoodLightExposure(kwargs, newnode)\n    newnode.parm(\"light_type\").set('grid')"
+		}
+	}
+}
