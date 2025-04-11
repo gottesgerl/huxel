@@ -324,7 +324,7 @@ class LmbMouseHandler(ng.NodeMouseHandler):
         
         editor = uievent.editor
         parent = editor.pwd()
-        context = parent.childTypeCategory().name()
+        if parent: context = parent.childTypeCategory().name()
            
         if isinstance(uievent, MouseEvent):
             if uievent.selected.item is not None:
@@ -421,11 +421,11 @@ class LmbMouseHandler(ng.NodeMouseHandler):
             elif uievent.selected.name == 'shapepaletteshape':
                 return palettes.ShapePaletteMouseHandler(uievent)
             elif uievent.selected.name in ('taskgraphworkitem', 'taskgraphcollapseditem'):
-                return WorkItemMouseHandler(uievent)
+                return ng.WorkItemMouseHandler(uievent)
             elif uievent.selected.name == 'taskgraphpage':
-                return TaskGraphPageHandler(uievent)
+                return ng.TaskGraphPageHandler(uievent)
             elif uievent.selected.name == 'taskgraphopentable':
-                return TaskGraphSeeMoreHandler(uievent)
+                return ng.TaskGraphSeeMoreHandler(uievent)
             elif uievent.selected.name in thePaletteBackgrounds:
                 return palettes.PaletteBackgroundMouseHandler(uievent)
             elif uievent.selected.name in thePaletteBorders:
