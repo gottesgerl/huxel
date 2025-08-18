@@ -1,5 +1,5 @@
 {
-	"fileversion":"20.5.332",
+	"fileversion":"20.5.613",
 	"name":"huxel_parametereditor_init",
 	"categories":"Standard",
 	"pane":"network",
@@ -10,7 +10,7 @@
 			"label":"NON-Default",
 			"type":"script_action",
 			"icon":"MISC_python",
-			"script":"\ndesktop = hou.ui.curDesktop()\np = hou.ui.paneUnderCursor()\npp = p.currentTab()\nmode = pp.filterEnabled()\n\nif mode == 0:\n    pp.setFilterEnabled(1)\n    pp.setFilterMode(hou.parmFilterMode.GraphSelectedParms)\nelse:\n    pp.setFilterEnabled(0)\n    pp.setFilterMode(hou.parmFilterMode.AllParms)\n"
+			"script":"\ndesktop = hou.ui.curDesktop()\np = hou.ui.paneUnderCursor()\npp = p.currentTab()\nmode = pp.filterEnabled()\n\nif mode == 0:\n    pp.setFilterEnabled(1)\n    pp.setFilterMode(hou.parmFilterMode.NonDefaultParms)\nelse:\n    pp.setFilterEnabled(0)\n    pp.setFilterMode(hou.parmFilterMode.AllParms)\n"
 		},
 		"4":{
 			"label":"Test",
