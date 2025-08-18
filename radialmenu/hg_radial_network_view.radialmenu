@@ -1,5 +1,5 @@
 {
-	"fileversion":"20.0.625",
+	"fileversion":"20.5.613",
 	"name":"hg_radial_network_view",
 	"categories":"Standard",
 	"pane":"network",
@@ -13,16 +13,16 @@
 			"script":"sel = hou.selectedItems()\ndesktop = hou.ui.curDesktop()\npane = hou.ui.paneUnderCursor()\npp = pane.currentTab()\ncp = pp.cursorPosition(confine_to_view=False)\nwidth = 3\nheight = 1.5\ntextSize = 0.85\n\np = pp.pwd()    \nnew_box = p.createStickyNote()\nnew_box.setColor(hou.Color(0.576, 0.208, 0.457))\nnew_box.setDrawBackground(0)\nnew_box.setTextColor(hou.Color(1, 0.75, 0))\nnew_box.setTextSize(textSize)\nnew_box.setText(\"Lorem\")\nnew_box.setPosition(hou.Vector2(cp[0],cp[1]))\nnew_box.setSize(hou.Vector2(width,height))\n\n    "
 		},
 		"1":{
-			"label":"Sim",
+			"label":"Kill Last Letter",
 			"type":"script_action",
-			"icon":"BUTTONS_resimulate",
-			"script":"radialmenu.runShelfTool(kwargs, 'simulations_toogle')"
+			"icon":"BUTTONS_jump_to_startframe",
+			"script":"#####################\n#\n#   KILL LAST LETTER\n#   by Hannes Gerl, 2025.jul.16\n#   v0.1\n#\n#   kills the last letter of all selected node names\n#\n#   hotkey: None\n#   icon: BUTTONS_jump_to_startframe\n#   context: None\n#\nimport hou\n\ndef kill_last_letter(verbose=0):   \n    sel = hou.selectedNodes()    \n    \n    for s in sel:\n        name = s.name()\n        newname = name[:-1]\n        s.setName(newname)\n       \n    if verbose: \n        print(f\" RENAMED: {name} ---> {newname}\")\n        hou.ui.setStatusMessage(f\"Renamed {len(sel)} files\", severity=hou.severityType.Message)\n    \n\nkill_last_letter()\n"
 		},
 		"2":{
 			"label":"Sel LOCAL",
 			"type":"script_action",
 			"icon":"SOP_each",
-			"script":"#####################\n#\n#       SELECT ALL LOCAL\n#   by Hannes Gerl, 2022.mar.03\n#       v0.1\n#\n#   returns all nodes of the same type (instances)\n#   in the local sop context#   \n#\n#   hotkey: None\n#       icon: SOP_each\n#       context: None\n#\n\nimport hou\n\nlocal=1\nverbose=2\n\n\nsel = hou.selectedNodes()\nall_instances = []\n\n\nfor s in sel:\n    cur_type = s.type()    \n    cur_instances = cur_type.instances()\n    #print(\"S:%s  cur_type:%s   instances:%s\\n\" %(s,cur_type,cur_instances))\n    for i in cur_instances:\n        if local: \n            if i in s.parent().children():\n                i.setSelected(1)\n                if verbose>1: print(\"%s\" %i)\n        else: \n            i.setSelected(1)\n            if verbose>1: print(\"%s\" %i.path())\n    #all_instances.expand(cur_instances)\n\n    \nif verbose: print(\"%s nodes selected.\" %len(hou.selectedNodes()))\n    \n    \n\n\n"
+			"script":"#####################\n#\n#       SELECT ALL LOCAL\n#   by Hannes Gerl, 2022.mar.03\n#       v0.1\n#\n#   returns all nodes of the same type (instances)\n#   in the local sop context#   \n#\n#   hotkey: None\n#       icon: SOP_each\n#       context: None\n#\n\nimport hou\n\nlocal=1\nverbose=0\n\n\nsel = hou.selectedNodes()\nall_instances = []\n\n\nfor s in sel:\n    cur_type = s.type()    \n    cur_instances = cur_type.instances()\n    #print(\"S:%s  cur_type:%s   instances:%s\\n\" %(s,cur_type,cur_instances))\n    for i in cur_instances:\n        if local: \n            if i in s.parent().children():\n                i.setSelected(1)\n                if verbose>1: print(\"%s\" %i)\n        else: \n            i.setSelected(1)\n            if verbose>1: print(\"%s\" %i.path())\n    #all_instances.expand(cur_instances)\n\n    \nif verbose: print(\"%s nodes selected.\" %len(hou.selectedNodes()))\n    \n    \n\n\n"
 		},
 		"3":{
 			"label":"MANUAL",
@@ -41,6 +41,12 @@
 			"type":"script_action",
 			"icon":"BUTTONS_comment_out",
 			"script":"#####################\n#\n#      TOOGLE BATCH\n#   by Hannes Gerl, 2022.oct.27\n#       v0.1\n#\n#   Script that toogles node batches visibility on/off\n#\n#   hotkey: None\n#       icon: PLASMA_App (None)\n#       context: None\n#\n\n\n\nimport hou\n\n\nverbose=0\nsel = hou.selectedNodes()\n\n\nfor s in sel:\n    #geting the current state\n    cur_state = s.isDisplayDescriptiveNameFlagSet()\n    new_state = abs(cur_state-1)\n    \n    s.setDisplayDescriptiveNameFlag(new_state)\n    \n    message = [\"off\", \"on\"]\n\n    if verbose: print(\"%s badges turned %s.\" %(s, message[new_state]))   \n\n\n\n"
+		},
+		"6":{
+			"label":"Sel GLOBAL",
+			"type":"script_action",
+			"icon":"SOP_each",
+			"script":"#####################\n#\n#       SELECT ALL GLOBAL\n#   by Hannes Gerl, 2022.mar.03\n#       v0.1\n#\n#   returns all nodes of the same type (instances)\n#   in the whole script (hip-file)\n#\n#   hotkey: None\n#       icon: SOP_each\n#       context: None\n#\n\nimport hou\n\nlocal=0\nverbose=2\n\n\nsel = hou.selectedNodes()\nall_instances = []\n\n\nfor s in sel:\n    cur_type = s.type()    \n    cur_instances = cur_type.instances()\n    #print(\"S:%s  cur_type:%s   instances:%s\\n\" %(s,cur_type,cur_instances))\n    for i in cur_instances:\n        if local: \n            if i in s.parent().children():\n                i.setSelected(1)\n                if verbose>1: print(\"%s\" %i)\n        else: \n            i.setSelected(1)\n            if verbose>1: print(\"%s\" %i.path())\n    #all_instances.expand(cur_instances)\n\nif verbose: print(\"%s nodes selected.\" %len(hou.selectedNodes()))\n"
 		},
 		"7":{
 			"label":"VIEW",

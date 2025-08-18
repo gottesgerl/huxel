@@ -234,7 +234,7 @@ def useRecipe(name, type="NodePreset", **kwargs):
             else: print("Preset %s not found." %name)
     #Houdini 20.5 and above
     else:
-        if (type == "NodePreset"):  
+        if (type == "NodePreset"):
             hou.data.applyNodePresetRecipe(name=name, node=node)
 
 

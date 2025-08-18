@@ -1,0 +1,58 @@
+{
+	"fileversion":"20.5.613",
+	"name":"network",
+	"categories":"Standard",
+	"pane":"network",
+	"label":"Network",
+	"type":"submenu",
+	"items":{
+		"0":{
+			"label":"Up",
+			"type":"script_action",
+			"icon":"BUTTONS_up",
+			"script":"pane = kwargs['pane']\nnetwork = pane.pwd()\nparent = network.parent()\nif parent and parent.path() != '/':\n    pane.setPwd(network.parent())"
+		},
+		"1":{
+			"label":"COPs",
+			"type":"script_action",
+			"icon":"NETWORKS_cop2",
+			"script":"kwargs['pane'].setPwd(hou.node('/img'))"
+		},
+		"2":{
+			"label":"Objects",
+			"type":"script_action",
+			"icon":"NETWORKS_obj",
+			"script":"kwargs['pane'].setPwd(hou.node('/obj'))"
+		},
+		"3":{
+			"label":"Materials",
+			"type":"script_action",
+			"icon":"NETWORKS_mat",
+			"script":"kwargs['pane'].setPwd(hou.node('/mat'))"
+		},
+		"4":{
+			"label":"Down",
+			"type":"script_action",
+			"icon":"BUTTONS_down",
+			"script":"pane = kwargs['pane']\nnode = pane.currentNode()\nif node and node.isNetwork():\n    pane.setPwd(node)"
+		},
+		"5":{
+			"label":"ROPs",
+			"type":"script_action",
+			"icon":"NETWORKS_rop",
+			"script":"kwargs['pane'].setPwd(hou.node('/out'))"
+		},
+		"6":{
+			"label":"DOPs",
+			"type":"script_action",
+			"icon":"NETWORKS_dop",
+			"script":"sim_node = hou.currentDopNet()\nif sim_node:\n    kwargs['pane'].setPwd(sim_node)"
+		},
+		"7":{
+			"label":"LOPs",
+			"type":"script_action",
+			"icon":"NETWORKS_lop",
+			"script":"kwargs['pane'].setPwd(hou.node('/stage'))"
+		}
+	}
+}
