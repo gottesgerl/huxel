@@ -237,9 +237,16 @@ def useRecipe(name, type="NodePreset", **kwargs):
         if (type == "NodePreset"):
             hou.data.applyNodePresetRecipe(name=name, node=node)
 
-
-
-
+def useLegacyPreset(name, **kwargs):
+    node = hou.node(kwargs["path"])
+    presets = hou.hscript("oppresetls %s" %node.path())[0].split("\n")
+    presetname_raw = hou.hda.componentsFromFullNodeTypeName(name)[2]
+    presetname_whitespaces = presetname_raw.replace("_", " ")
+    presetname_formatted = "(%s)%s" %(presetname_whitespaces[0], presetname_whitespaces[1:])
+    if presetname_raw in presets: hou.hscript("oppresetload %s \"%s\"" %(node.path(), presetname_raw))
+    elif presetname_formatted in presets: hou.hscript("oppresetload %s \"%s\"" %(node.path(), presetname_formatted))
+    else: print("Preset %s not found." %name)
+    
 def radialMenuScan(radialmenu):
     #positions = [hou.radialItemLocation.Top, hou.radialItemLocation.TopRight, hou.radialItemLocation.Right, hou.radialItemLocation.BottomRight, hou.radialItemLocation.Bottom, hou.radialItemLocation.BottomLeft, hou.radialItemLocation.Left, hou.radialItemLocation.TopLeft]
     positions = [hou.radialItemLocation.TopRight,]

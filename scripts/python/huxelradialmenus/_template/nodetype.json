@@ -1,0 +1,66 @@
+{
+	
+	"nw": [
+			{
+			"type": "script_action",
+			"label": "Run Command to Set Input",
+			"icon": "MISC_orientation",
+			"script": "module.setInput(value=0,**kwargs)",  
+			"shortcut": "Q"
+			}
+		],
+	"n": [
+			{
+			"type": "script_action",
+			"label": "Apply Legacy Preset",
+			"icon": "VOP_not",
+			"script": "commontools.useLegacyPreset(name=\"test\", **kwargs)",
+			"shortcut": "W"
+			}
+		],
+	"ne": [
+			{
+			"type": "script_action",
+			"label": "Print North-East",
+			"icon": "CONVERTED_IMGUI_TimeSources",
+			"script": "print('North-East')",
+			"shortcut": "E"
+			}
+		],
+	"w": [
+			{
+			"type": "script_action",
+			"label": "Use Receipe",
+			"icon": "BUTTONS_action",
+			"script": "commontools.useRecipe(name='Sop/nodetype::Administrator::receipe_name', type='NodePreset', **kwargs)",
+			"shortcut": "A"
+			}
+		],
+	"sw": [
+			{
+			"type": "script_action",
+			"label": "Run Test Module",
+			"icon": "MISC_examine",
+			"script": "module.test()",
+			"shortcut": "Z"
+			}
+		],
+	"e": [
+			{
+			"type":	"script_action",
+			"label": "Convert to Merge",
+			"icon": "SOP_merge",
+			"script": "commontools.convertNode(nodetype='merge', **kwargs)",
+			"shortcut": "D"
+			}
+		],
+	"s": [
+			{
+			"type": "script_action",
+			"label": "NEXT: Attribwrangle",
+			"icon": "SOP_attribwrangle",
+			"script": "commontools.createNode(nodetype='attribwrangle', **kwargs)",
+			"shortcut": "X"
+			}
+		]
+}
