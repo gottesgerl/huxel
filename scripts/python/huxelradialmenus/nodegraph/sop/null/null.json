@@ -9,7 +9,7 @@
 			"shortcut": "W"
 			}
 		],
-	"e": [
+	"ne": [
 			{
 			"type": "script_action",
 			"label": "Python Editor",
@@ -18,7 +18,7 @@
 			"shortcut": "D"
 			}
 		],
-	"s": [
+	"e": [
 			{
 			"type": "script_action",
 			"label": "Obj Merge",
@@ -35,5 +35,14 @@
 			"script": "commontools.useRecipe(name='Sop/null::Administrator::2_geo_infos', type='NodePreset', **kwargs)",			
 			"shortcut": "A"
 			}
+		],
+	"s": [
+			{
+			"type": "script_action",
+			"label": "RENDER",
+			"icon": "BUTTONS_render.svg",
+			"script": "module.create_render(**kwargs)",			
+			"shortcut": "A"
+			}		
 		]
 }

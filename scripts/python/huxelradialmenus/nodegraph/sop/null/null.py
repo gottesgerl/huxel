@@ -19,7 +19,26 @@ def create_objmerge(display=1, connect=0, select=1, good_position=0, hide_badges
     else:                                   newnode.setPosition(newpos)
     return newnode
     
-    
+
+def create_render(display=0, connect=1, select=0, good_position=0, hide_badges=1, **kwargs):
+    # creates an null node under the current node, names it RENDER, and puts the render flag on it. 
+    node = hou.node(kwargs["path"])
+    parent = node.parent()    
+    position_offset = hou.Vector2(0,-1)
+    newpos = node.position()+position_offset    
+    newname = 'RENDER'
+    newnode = parent.createNode("null", node_name=newname, force_valid_node_name=True)
+    newnode.setRenderFlag(1)
+    if select: newnode.setSelected(True, True)
+    if hide_badges:                         newnode.setDisplayDescriptiveNameFlag(False)
+    if good_position:                       newnode.moveToGoodPosition(move_inputs = False, move_outputs = False, move_unconnected = False)        
+    else:                                   newnode.setPosition(newpos)
+    if not "inputs" in kwargs:
+        if connect: newnode.setNextInput(node)
+    return newnode
+
+
+
 def create_objmerge_in_new_geo(display=1, select=1, good_position=0, hide_badges=1, **kwargs):
     # creates an object merge node in an new geometry node points to the node under the cursor and jumps there
     node = hou.node(kwargs["path"])

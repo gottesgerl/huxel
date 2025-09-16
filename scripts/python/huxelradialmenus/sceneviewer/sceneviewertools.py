@@ -1,6 +1,14 @@
 import hou
-from PySide2 import QtCore
-from PySide2.QtWidgets import QMainWindow, QPushButton, QVBoxLayout, QWidget, QLabel
+houversion = hou.applicationVersion()
+if houversion[0]>=21:
+    #from hou 21 on
+    from PySide6 import QtCore
+    from PySide6.QtWidgets import QMainWindow, QPushButton, QVBoxLayout, QWidget, QLabel
+else:
+    from PySide2 import QtCore
+    from PySide2.QtWidgets import QMainWindow, QPushButton, QVBoxLayout, QWidget, QLabel
+
+
 import huxelradialmenus.commontools as commontools
 import os
 import radialmenu
