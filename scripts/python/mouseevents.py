@@ -1,5 +1,9 @@
 from __future__ import print_function
 from __future__ import division
+try:
+    from PySide6 import QtWidgets, QtCore, QtGui
+except ImportError:
+    from PySide2 import QtWidgets, QtCore, QtGui
 from builtins import next
 from past.utils import old_div
 import hou
@@ -479,6 +483,21 @@ class MouseWheelHandler(ng.NodeMouseHandler):
             # CTRL --> wheeldiving  
             if not uievent.modifierstate.shift and uievent.modifierstate.ctrl and not uievent.modifierstate.alt:
                 wheelDiving(uievent, editor, wheel_direction)
+            # SHIFT only --> jump back/forward (NEW)
+            elif uievent.modifierstate.shift and not uievent.modifierstate.ctrl and not uievent.modifierstate.alt:
+                widget = QtWidgets.QApplication.focusWidget()
+                if widget:
+                    if wheel_direction == "up":
+                        key = QtCore.Qt.Key_Left
+                    elif wheel_direction == "down":
+                        key = QtCore.Qt.Key_Right
+                    else:
+                        key = None
+                    if key:
+                        press = QtGui.QKeyEvent(QtCore.QEvent.KeyPress, key, QtCore.Qt.AltModifier)
+                        release = QtGui.QKeyEvent(QtCore.QEvent.KeyRelease, key, QtCore.Qt.AltModifier)
+                        QtWidgets.QApplication.sendEvent(widget, press)
+                        QtWidgets.QApplication.sendEvent(widget, release)
             # SHIFT + CTRL --> scale nodeshapes
             elif uievent.modifierstate.shift and uievent.modifierstate.ctrl and not uievent.modifierstate.alt:
                 wheelNodeScaling(uievent, editor, wheel_direction)
