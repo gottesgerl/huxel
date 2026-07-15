@@ -317,22 +317,39 @@ def wheelNodeScaling(uievent, editor, wheel_direction):
 '''
 
 
-def wheelShapeChange(uievent, editor, wheel_direction):
-    # scale node shapes
+def wheelChangeNodeshape(uievent, editor, wheel_direction):
+    # change node shapes
     shape_lib = ["rect", "circle", "null"]
-    all_shapes = editor.nodeShapes()
+    #all_shapes = editor.nodeShapes()
     if uievent.located.item != None:
         node = hou.node(uievent.located.item.path())
         nodeshape = node.userData("nodeshape")
-        #get default shape for nodetype
-        #if not nodeshape: nodeshape = node.type().defaultShape()
-        #if not nodeshape: nodeshape ="rect"
         index = shape_lib.index(nodeshape) if nodeshape in shape_lib else -1
-        new_index = (index+1) % len(shape_lib)
+        if wheel_direction == "down": 
+            new_index = (index+1) % len(shape_lib)
+        elif wheel_direction == "up":
+            new_index = (index-1) % len(shape_lib)
         new_shape = shape_lib[new_index]
         node.setUserData("nodeshape", new_shape)
 
-
+def wheelChangeNodecolor(uievent, editor, wheel_direction):
+    # change node colors
+    # the color library is a list of colors that are used to cycle through the node colors
+    # its colors are default grey, orange, green, blue, pink, purple, red, black 
+    #color_lib = [(0.6, 0.7, 0.77), (1,0.73,0), (0.14,0.67,.56), (.09,.37,.69), (.89, .41, .76), (0.58,.21,.47), (0.8,.02,0.02), (0,0,0)]
+    # its colors are default grey, orange, green, blue, pink, red
+    color_lib = [(0.6, 0.7, 0.77), (1,0.73,0), (0.14,0.67,.56), (.09,.37,.69), (.89, .41, .76), (0.8,.02,0.02)]
+    if uievent.located.item != None:
+        node = hou.node(uievent.located.item.path())
+        #nodecolor = node.color()
+        nodecolor = tuple(round(c, 2) for c in node.color().rgb())
+        index = color_lib.index(nodecolor) if nodecolor in color_lib else -1
+        if wheel_direction == "down":         
+            new_index = (index+1) % len(color_lib)
+        elif wheel_direction == "up":
+            new_index = (index-1) % len(color_lib)
+        new_color = color_lib[new_index]
+        node.setColor(hou.Color(new_color))
 
 
 
@@ -522,9 +539,15 @@ class MouseWheelHandler(ng.NodeMouseHandler):
             # SHIFT + CTRL --> scale nodeshapes
             elif uievent.modifierstate.shift and uievent.modifierstate.ctrl and not uievent.modifierstate.alt:
                 wheelNodeScaling(uievent, editor, wheel_direction)
-            # ALT --> nothing  
+            # ALT --> change node colors
             elif not uievent.modifierstate.shift and not uievent.modifierstate.ctrl and uievent.modifierstate.alt:
-                wheelShapeChange(uievent, editor, wheel_direction)
+                wheelChangeNodecolor(uievent, editor, wheel_direction)   
+            # CTRL + ALT --> change node shapes
+            elif not uievent.modifierstate.shift and uievent.modifierstate.ctrl and uievent.modifierstate.alt:
+                wheelChangeNodeshape(uievent, editor, wheel_direction)
+            # SHIFT + ALT --> nothing
+            #elif uievent.modifierstate.shift and not uievent.modifierstate.ctrl and uievent.modifierstate.alt:
+            #    wheelChangeNodecolor(uievent, editor, wheel_direction)
             else:
             # NO MODIFIER --> default behaviour  
                 view.scaleWithMouseWheel(uievent)
