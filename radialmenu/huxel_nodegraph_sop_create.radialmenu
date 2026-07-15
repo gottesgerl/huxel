@@ -1,0 +1,58 @@
+{
+	"fileversion":"21.0.440",
+	"name":"huxel_nodegraph_sop_create",
+	"categories":"Standard",
+	"pane":"network",
+	"label":"Huxel - Nodegraph - SOP _create_",
+	"type":"submenu",
+	"items":{
+		"0":{
+			"label":"Transform",
+			"type":"script_action",
+			"icon":"SOP_xform",
+			"script":"radialmenu.runShelfTool(kwargs, 'sop_xform')"
+		},
+		"1":{
+			"label":"Box",
+			"type":"script_action",
+			"icon":"SOP_box",
+			"script":"radialmenu.runShelfTool(kwargs, 'sop_box')"
+		},
+		"2":{
+			"label":"Group",
+			"type":"script_action",
+			"icon":"SOP_groupcreate",
+			"script":"#####################\n#\n#   GROUP\n#   by Hannes Gerl, 2025.mar.26\n#       v0.1\n#\n#   creates a group create node\n#   names it \"grp_\" + a popup dialog will appear for the groups name\n#\n#   hotkey: None\n#   icon: SOP_groupcreate\n#       context: SOP\n#\n\nimport objecttoolutils\n\nprefix = \"grp_\"\n\nkwargs['bbox'] = hou.BoundingBox(-0.5, -0.5, -0.5, 0.5, 0.5, 0.5)\nobjecttoolutils.genericTool(kwargs, 'groupcreate')\n\ncurNode = kwargs['pane'].currentNode()\ncurNode.parm(\"groupname\").set('`strreplace(strreplace($OS, \"'+prefix+'\", \"\"), opdigits(strreplace($OS, \"'+prefix+'_\", \"\")), \"\")`')\ncurNode.setDisplayDescriptiveNameFlag(False)\n\nuserName = prefix+hou.ui.readInput('Enter Group Name', title='Create Group', initial_contents=\"\")[1]\ncurNode.setName(userName, unique_name=True)\n\n"
+		},
+		"3":{
+			"label":"OUT",
+			"type":"script_action",
+			"icon":"OBJ_null",
+			"script":"#####################\n#\n#       OUT\n#   by Hannes Gerl, 2020.nov.23\n#       v0.1\n#\n#   creates a Null\n#   and names it \"OUT\"\n#   a popup dialog will appear if that name is already in use\n#\n#   hotkey: None\n#   icon: OBJ_null\n#       context: SOP\n#       TAB Submenu: SPLASH\n#\n\n#import objecttoolutils\n#kwargs['bbox'] = hou.BoundingBox(-0.5, -0.5, -0.5, 0.5, 0.5, 0.5)\n#objecttoolutils.genericTool(kwargs, 'null')\n#curNode = kwargs['pane'].currentNode()\n\n\nimport mouseevents\nimport nodegraphview as view\neditor = kwargs['pane']\n\ncurNode = editor.pwd().createNode(\"null\")\n\ntry:\n    curNode.setName('OUT')\n    \nexcept:\n    try:\n        userName = hou.ui.readInput('OUT already exists. Enter suffix', title='create OUT Null', initial_contents=\"OUT_\")[1]\n        curNode.setName(userName)\n    except:\n        userName = hou.ui.readInput('OUT suffix exists. Enter another suffix', title='create OUT Null', initial_contents=\"OUT_\")[1]\n        curNode.setName(userName)"
+		},
+		"4":{
+			"label":"Obj Merge From Clipboard",
+			"type":"script_action",
+			"icon":"BUTTONS_down",
+			"script":"#####################\n#\n#   CLIPBOARD TO OBJECT MERGE\n#   by Hannes Gerl, 2024.sep.20\n#   with help from https://berniebernie.fr/wiki/Houdini_Python\n#   Thank you!\n#   v0.1\n#\n#   Creates Object Merge Nodes based on the current clipboard\n#\n#   hotkey: None\n#       icon: PLASMA_App (None)\n#       context: Ctrl+Shift+B\n#\n\n\nnetwork = hou.ui.curDesktop().paneTabUnderCursor()\nparent = network.pwd().path()\nmouse_pos = network.cursorPosition()\nclipboard = hou.ui.getTextFromClipboard()\n\nprefix = \"IN_\"\noffset = 0.0\noffset_min = 1\noffset_per_letter = .1\nnodes = []\n\nif clipboard:\n    list = clipboard.split()\n    for item in list:\n        node = hou.node(item)\n        if node != None:\n            nicename = prefix+node.name().replace(\"OUT_\", \"\")\n            obj_merge = hou.node(parent).createNode('object_merge')\n            obj_merge.setName(nicename, 1)\n            obj_merge.parm('objpath1').set(node.path())\n            obj_merge.setPosition(mouse_pos)\n            obj_merge.move([len(nodes)*offset_min,0])\n            obj_merge.move([offset,0])\n            offset += obj_merge.size()[0]+(len(obj_merge.name())*offset_per_letter)\n            if not len(nodes): obj_merge.setSelected(True, True)\n            else:              obj_merge.setSelected(True, False)\n            obj_merge.setDisplayDescriptiveNameFlag(False)\n            nodes.append(obj_merge)\n            \nif not len(nodes): hou.ui.setStatusMessage(\"No nodes found in clipboard. Please copy (ctrl+c) a node/nodes to the clipboard first.\", hou.severityType.ImportantMessage)"
+		},
+		"5":{
+			"label":"Blast",
+			"type":"script_action",
+			"icon":"SOP_blast",
+			"script":"radialmenu.runShelfTool(kwargs, 'sop_blast')"
+		},
+		"6":{
+			"label":"Wrangle",
+			"type":"script_action",
+			"icon":"SOP_attribwrangle",
+			"script":"radialmenu.runShelfTool(kwargs, 'sop_attribwrangle')"
+		},
+		"7":{
+			"label":"Sphere",
+			"type":"script_action",
+			"icon":"SOP_sphere",
+			"script":"radialmenu.runShelfTool(kwargs, 'geometry_sphere')"
+		}
+	}
+}
