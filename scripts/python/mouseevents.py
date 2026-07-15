@@ -1,5 +1,9 @@
 from __future__ import print_function
 from __future__ import division
+try:
+    from PySide6 import QtWidgets, QtCore, QtGui
+except ImportError:
+    from PySide2 import QtWidgets, QtCore, QtGui
 from builtins import next
 from past.utils import old_div
 import hou
@@ -312,6 +316,27 @@ def wheelNodeScaling(uievent, editor, wheel_direction):
         s.setUserData("nodeshape", default_shape)
 '''
 
+
+def wheelShapeChange(uievent, editor, wheel_direction):
+    # scale node shapes
+    shape_lib = ["rect", "circle", "null"]
+    all_shapes = editor.nodeShapes()
+    if uievent.located.item != None:
+        node = hou.node(uievent.located.item.path())
+        nodeshape = node.userData("nodeshape")
+        #get default shape for nodetype
+        #if not nodeshape: nodeshape = node.type().defaultShape()
+        #if not nodeshape: nodeshape ="rect"
+        index = shape_lib.index(nodeshape) if nodeshape in shape_lib else -1
+        new_index = (index+1) % len(shape_lib)
+        new_shape = shape_lib[new_index]
+        node.setUserData("nodeshape", new_shape)
+
+
+
+
+
+
 #-------------------------------------------Left Mouse Button Handler -----------------------------------   
 
   
@@ -479,12 +504,27 @@ class MouseWheelHandler(ng.NodeMouseHandler):
             # CTRL --> wheeldiving  
             if not uievent.modifierstate.shift and uievent.modifierstate.ctrl and not uievent.modifierstate.alt:
                 wheelDiving(uievent, editor, wheel_direction)
+            # SHIFT only --> jump back/forward (NEW)
+            elif uievent.modifierstate.shift and not uievent.modifierstate.ctrl and not uievent.modifierstate.alt:
+                widget = QtWidgets.QApplication.focusWidget()
+                if widget:
+                    if wheel_direction == "up":
+                        key = QtCore.Qt.Key_Left
+                    elif wheel_direction == "down":
+                        key = QtCore.Qt.Key_Right
+                    else:
+                        key = None
+                    if key:
+                        press = QtGui.QKeyEvent(QtCore.QEvent.KeyPress, key, QtCore.Qt.AltModifier)
+                        release = QtGui.QKeyEvent(QtCore.QEvent.KeyRelease, key, QtCore.Qt.AltModifier)
+                        QtWidgets.QApplication.sendEvent(widget, press)
+                        QtWidgets.QApplication.sendEvent(widget, release)
             # SHIFT + CTRL --> scale nodeshapes
             elif uievent.modifierstate.shift and uievent.modifierstate.ctrl and not uievent.modifierstate.alt:
                 wheelNodeScaling(uievent, editor, wheel_direction)
             # ALT --> nothing  
-            #elif not uievent.modifierstate.shift and not uievent.modifierstate.ctrl and uievent.modifierstate.alt:
-            #    wheelShapeChange(uievent, editor, wheel_direction)
+            elif not uievent.modifierstate.shift and not uievent.modifierstate.ctrl and uievent.modifierstate.alt:
+                wheelShapeChange(uievent, editor, wheel_direction)
             else:
             # NO MODIFIER --> default behaviour  
                 view.scaleWithMouseWheel(uievent)
