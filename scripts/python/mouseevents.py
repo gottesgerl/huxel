@@ -204,15 +204,19 @@ def handle_SOPnull(editor, node):
 
 def handle_SOPmaterial(editor, node):
     # Material 
-    # go to dependent nodes
+    # go to dependent nodes    
     try:
-        target = node.parm("shop_materialpath1").evalAsNode().dependents()[1]
+        #target = node.parm("shop_materialpath1").evalAsNode().dependents()[1]
+        target = node.parm("shop_materialpath1").evalAsNode()
+        if target: target.setCachedUserData("huxel_mat_origin", node.path())        
     except: 
         target = None
     if target:
-        centerNode(editor, target)
-        setSelection(editor, target)
-
+        if      target.type().name() == "redshift_vopnet":    view.changeNetwork(editor, target)
+        elif    target.type().name() == "subnet":             view.changeNetwork(editor, target)
+        else:
+            centerNode(editor, target)
+            setSelection(editor, target)
 
 def handle_SOPswitch(uievent, editor, node):
     # SWITCH 
@@ -232,7 +236,17 @@ def create_geo_node(uievent, editor, jump=1):
     newgeo.setPosition(pos)
     if jump: view.changeNetwork(editor, newgeo)
     
-    
+def jump_from_material_to_SOP(editor, net=None):
+    if net is None: net = editor.pwd()
+    origin = net.cachedUserData("huxel_mat_origin")
+    target = hou.node(origin) if origin else None
+    if not target:
+        mat_type = hou.nodeType(hou.sopNodeTypeCategory(), "material")
+        mats = [d for d in net.dependents() if d.type() == mat_type]
+        if mats: target = mats[0]
+    if target:
+        centerNode(editor, target)
+        setSelection(editor, target)    
 #-------------------------------------------MOUSE WHEEL functions
 
 
@@ -433,7 +447,7 @@ class LmbMouseHandler(ng.NodeMouseHandler):
                         # NO MODIFIERS --> create geo   
                         if not uievent.modifierstate.shift and not uievent.modifierstate.ctrl and not uievent.modifierstate.alt:
                             if context == "Object":     create_geo_node(uievent, editor)
-                        
+                            if context == "Vop":        jump_from_material_to_SOP(editor) 
 
                             
                            
@@ -454,7 +468,10 @@ class LmbMouseHandler(ng.NodeMouseHandler):
 
                     if type == hou.nodeType(hou.sopNodeTypeCategory(), "material"):
                         handle_SOPmaterial(editor, node)
-                        
+
+                    #different materials types
+                    if type.name() in ("subnetconnector", "redshift_material", "redshift_usd_material"):
+                        jump_from_material_to_SOP(editor, net=None)  
         
         #------------------------------------------- HANDLING OVERLAYS AND SPECIFIC CASES      
                     
