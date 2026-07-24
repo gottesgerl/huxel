@@ -31,31 +31,36 @@ def paneinfo():
     return kwargs
     
 
-def getClosestNode():
+def getClosestNode(max_distance=2.5):
     p = paneinfo()
     desktop = hou.ui.curDesktop()
     editor = desktop.findPaneTab(p.get("panetab"))
     pane_size = p.get("pane_size")
-    parent = p.get("parent")
     context = p.get("context")
     cursorpos = p.get("cursor_position")
-    # Get closest node  
-    pos1 = hou.Vector2(0,0)
+    cp = hou.Vector2(cursorpos)
+
+    # Get closest node
+    pos1 = hou.Vector2(0, 0)
     pos2 = hou.Vector2(pane_size[0], pane_size[1])
-    allItems = editor.networkItemsInBox(pos1, pos2, for_drop="False", for_select="False")
-    allNodes = [ i[0] for i in allItems if i[1]=='node']
-    allDistances = { i:i.position().distanceTo(hou.Vector2(cursorpos)) for i in allNodes }
-    nodesByDistance = {k: v for k, v in sorted(allDistances.items(), key=lambda item: item[1])}
-    if not nodesByDistance: 
-        kwargs = {"path":None, "distance":9999, "context":context, "editor":editor.name(), "cursorpos":cursorpos}
-    else:
-        node = list(nodesByDistance.keys())[0]
-        distance = list(nodesByDistance.values())[0]
-        nodetype = node.type()
-        path = node.path()
-        #presets = hou.hscript("oppresetls %s" %node.path())[0].split("\n")
-        kwargs = {"path":path, "distance":distance, "context":context, "editor":editor.name(), "cursorpos":cursorpos}
-    return kwargs
+    allItems = editor.networkItemsInBox(pos1, pos2, for_drop=False, for_select=True)
+    allNodes = [i[0] for i in allItems if i[1] == 'node']
+
+    # distance to the node's boundary -> 0.0 means the cursor is on the node
+    allDistances = {i: editor.itemRect(i).closestPoint(cp).distanceTo(cp) for i in allNodes}
+    ranked = sorted(allDistances.items(), key=lambda item: item[1])
+
+    if not ranked:
+        return {"path": None, "distance": 9999, "hit": "none",
+                "context": context, "editor": editor.name(), "cursorpos": cursorpos}
+
+    node, distance = ranked[0]
+    if   distance == 0.0:          hit = "exact"
+    elif distance <= max_distance: hit = "close"
+    else:                          hit = "none"
+
+    return {"path": node.path(), "distance": distance, "hit": hit,
+            "context": context, "editor": editor.name(), "cursorpos": cursorpos}
 
         
 def createNode(nodetype, connect=1, display=1, select=1, good_position=1, **kwargs):

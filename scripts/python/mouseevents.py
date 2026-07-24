@@ -1,5 +1,6 @@
 from __future__ import print_function
 from __future__ import division
+from platform import node
 try:
     from PySide6 import QtWidgets, QtCore, QtGui
 except ImportError:
@@ -57,6 +58,10 @@ theFlyoutParts =                ( 'nodeexpanded', 'info','flag','indirectinputex
 theBackgroundImageElements =    ( 'backgroundimage', 'backgroundimageborder', 'backgroundimagedelete', 'backgroundimagelink', 'backgroundimagebrightness')
 theBackgroundImageDraggables =  ( 'backgroundimage', 'backgroundimageborder', 'backgroundimagelink', 'backgroundimagebrightness')
 
+#------------------------------------------- SETTINGS -----------------------------------    
+
+radius_around_nodes = 2.0
+
 
 
 def getVisibleNodes(uievent, max_distance=-1):
@@ -83,21 +88,24 @@ def getVisibleNodes(uievent, max_distance=-1):
 def setDisplayFlags(editor, node):
     # set display flag to closest node
     # move the renderflag with it if both were on the same node
+    theDisplayFlagContexts = ("Sop", "Cop", "Lop", "Dop", "Chop")
     parent = editor.pwd()
     context = parent.childTypeCategory().name()
     if context == "Sop":
         if parent.displayNode() == parent.renderNode(): node.setRenderFlag(True)
         node.setDisplayFlag(True)
+    elif context in theDisplayFlagContexts:
+        node.setDisplayFlag(True)
     elif context == "Object":
-        node.setDisplayFlag(abs(node.isDisplayFlagSet()-1))
-        
+        node.setDisplayFlag(abs(node.isDisplayFlagSet()-1))        
         
 def bypassToggle(editor, node):
     # toggle bypass on/off
     # obj-level: toggle selectable
+    theBypassContexts =             ( 'Sop', 'Cop', 'Lop', 'Dop', 'Chop', 'Vop', 'Top' )
     parent = editor.pwd()
     context = parent.childTypeCategory().name()
-    if context == "Sop":
+    if context in theBypassContexts:
         node.bypass(not node.isBypassed())
     elif context == "Object":
         node.setSelectableInViewport(not node.isSelectableInViewport())
@@ -152,11 +160,34 @@ def viewCycle(editor):
             for n in range(len(cycle_nodes)):
                 if cycle_nodes[n]==displayNode:
                     setDisplayFlags(editor, cycle_nodes[(n+1)%len(cycle_nodes)])
-    
+
+theTemplateContexts =           ( 'Sop', 'Cop' )
+theShadedTemplateContexts =     ( 'Sop', 'Cop', )
+
+def templateToggle(editor, node):
+    # toggle template flag
+    # VOP: toggle debug flag
+    # obj-level: remove from selection
+    parent = editor.pwd()
+    context = parent.childTypeCategory().name()
+    if context in theTemplateContexts:
+        if context in theShadedTemplateContexts and node.isSelectableTemplateFlagSet():
+            node.setSelectableTemplateFlag(False)
+            node.setTemplateFlag(True)
+        else:
+            node.setTemplateFlag(not node.isTemplateFlagSet())          
+    elif context == "Vop":
+        node.setDebugFlag(not node.isDebugFlagSet())
+    elif context == "Object":
+        node.setSelected(False)
+
 def shadedTemplate(editor, node):
     # toggles shaded template flag
     # turns of template flag together with selectable template flag
-    value = abs(node.isSelectableTemplateFlagSet()-1)
+    parent = editor.pwd()
+    context = parent.childTypeCategory().name()
+    if context not in theShadedTemplateContexts: return
+    value = not node.isSelectableTemplateFlagSet()
     node.setSelectableTemplateFlag(value)
     if not value: node.setTemplateFlag(False)
     
@@ -186,12 +217,12 @@ def centerNode(editor, node):
 def handle_SOPobjectMerge(editor, node):
     # OBJECT MERGE 
     # goto input1
-    path = node.parm("objpath1").evalAsNodePath()
-    target = hou.node(path)
-    centerNode(editor, target)
-    setSelection(editor, target)
-    #editor.homeToSelection()
-
+    # /// DELETE ME -- path = node.parm("objpath1").evalAsNodePath()
+    # /// DELETE ME -- target = hou.node(path)
+    target = node.parm("objpath1").evalAsNode()
+    if target:
+        centerNode(editor, target)
+        setSelection(editor, target)
 
 def handle_SOPnull(editor, node):
     # NULL 
@@ -247,6 +278,16 @@ def jump_from_material_to_SOP(editor, net=None):
     if target:
         centerNode(editor, target)
         setSelection(editor, target)    
+
+def handle_LOPsopImport(editor, node):
+    target = node.parm("soppath").evalAsNode()
+    if target:
+        centerNode(editor, target)
+        setSelection(editor, target)
+
+
+
+
 #-------------------------------------------MOUSE WHEEL functions
 
 
@@ -400,7 +441,7 @@ class LmbMouseHandler(ng.NodeMouseHandler):
                     #different operations use different search radii                    
                     if SHIFT and CTRL and not ALT:     max_distance = 99 
                     elif SHIFT and CTRL and ALT:       max_distance = 99
-                    else:                               max_distance = 2.5
+                    else:                               max_distance = radius_around_nodes
                     
                     nodes = getVisibleNodes(uievent, max_distance)
                     
@@ -431,12 +472,11 @@ class LmbMouseHandler(ng.NodeMouseHandler):
                         
                         # ALT --> toogle template flag / remove from selection                 
                         elif uievent.modifierstate.alt and not uievent.modifierstate.ctrl and not uievent.modifierstate.shift:
-                            if context == "Sop":        closest_node.setTemplateFlag(abs(closest_node.isTemplateFlagSet()-1))
-                            if context == "Object":    closest_node.setSelected(False)
+                            templateToggle(editor, closest_node)
                             
                         # ALT + CTRL --> toogle shaded template mode
                         elif uievent.modifierstate.alt and uievent.modifierstate.ctrl and not uievent.modifierstate.shift:
-                            if context == "Sop":        shadedTemplate(editor, closest_node)
+                            shadedTemplate(editor, closest_node)
                                                         
                         # NO MODIFIER --> set display flag      
                         else:
@@ -472,6 +512,9 @@ class LmbMouseHandler(ng.NodeMouseHandler):
                     #different materials types
                     if type.name() in ("subnetconnector", "redshift_material", "redshift_usd_material"):
                         jump_from_material_to_SOP(editor, net=None)  
+
+                    if type == hou.nodeType(hou.lopNodeTypeCategory(), "sopimport"):
+                        handle_LOPsopImport(editor, node)    
         
         #------------------------------------------- HANDLING OVERLAYS AND SPECIFIC CASES      
                     
