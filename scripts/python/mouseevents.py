@@ -91,14 +91,15 @@ def setDisplayFlags(editor, node):
     theDisplayFlagContexts = ("Sop", "Cop", "Lop", "Dop", "Chop")
     parent = editor.pwd()
     context = parent.childTypeCategory().name()
-    if context == "Sop":
-        if parent.displayNode() == parent.renderNode(): node.setRenderFlag(True)
-        node.setDisplayFlag(True)
+    if context == "Object":
+        node.setDisplayFlag(abs(node.isDisplayFlagSet()-1))
     elif context in theDisplayFlagContexts:
+        cur_display = parent.displayNode()
+        if cur_display is not None and hasattr(cur_display, "isRenderFlagSet") \
+                and cur_display.isRenderFlagSet() and hasattr(node, "setRenderFlag"):
+            node.setRenderFlag(True)
         node.setDisplayFlag(True)
-    elif context == "Object":
-        node.setDisplayFlag(abs(node.isDisplayFlagSet()-1))        
-        
+
 def bypassToggle(editor, node):
     # toggle bypass on/off
     # obj-level: toggle selectable
@@ -312,51 +313,48 @@ def wheelDiving(uievent, editor, wheel_direction):
     time.sleep(.1)
 
 
-def wheelNodeScaling(uievent, editor, wheel_direction):
-    # scale node shapes
-    all_shapes = editor.nodeShapes()
-    if uievent.located.item != None:
-        node = hou.node(uievent.located.item.path())
-        nodeshape = node.userData("nodeshape")
-        #get default shape for nodetype
-        if not nodeshape: nodeshape = node.type().defaultShape()
-        if not nodeshape: nodeshape ="rect"
-        default_shape = nodeshape
-        new_shape = ""
-        if not nodeshape:       nodeshape = node.type().defaultShape()
-        all_shapes = editor.nodeShapes()
-        size_token = re.findall("[_]([sl])([\d])$", nodeshape)
-        size = ""
-        step = 0
-        #We found a custom size
-        if size_token:
-            if len(size_token[0])==2:
-                size = size_token[0][0]
-                step = int(size_token[0][1])
-                default_shape = nodeshape.replace(("_"+size+str(step)), "")
-        else: 
-            size = "d"
-            step = 1
-            
-        if wheel_direction == "down":           
-            if size=="s": step -= 1
-            elif size=="l": step += 1
-            else: size="l"      
-            #print("Make Bigger %s --> Size: %s --> Step: %s --> Default Shape: %s" %(nodeshape, size, step, default_shape))            
+#----------------------------------------- NODE SHAPE SCALING
 
-        elif wheel_direction == "up":    
-            if size=="s": step += 1
-            elif size=="l": step -= 1
-            else: size="s"            
-            #print("Make Smaller %s --> Size: %s --> Step: %s --> Default Shape: %s" %(nodeshape, size, step, default_shape))               
-        
-        #if step = 0 use default shape
-        if step==0: new_shape = default_shape
-        else:       new_shape = default_shape+"_"+size+str(step)
-        #print("Original: %s --> --> Size: %s --> Step: %s --> New: %s" %(nodeshape, size, step, new_shape))
-        
-        if new_shape in all_shapes:
-            node.setUserData("nodeshape", new_shape)
+SIZE_RE = re.compile(r"_(s|l)(\d+)$")
+
+def _family_base(shape, all_shapes):
+    """Canonical (default) base name for any size-variant shape."""
+    m = SIZE_RE.search(shape)
+    if not m:
+        return shape                       # already a base shape
+    stem = SIZE_RE.sub("", shape)          # 'circl' (small) or 'circle' (large)
+    if m.group(1) == "l":
+        return stem                        # large stem is intact
+    for cand in all_shapes:                # small stem lost a char -> find owner
+        if not SIZE_RE.search(cand) and cand[:-1] == stem:
+            return cand
+    return stem                            # fallback
+
+def _size_ladder(base, all_shapes):
+    """Smallest -> biggest ordered list for a family."""
+    small_stem = base[:-1] + "_s"          # 'circl_s'
+    large_stem = base + "_l"               # 'circle_l'
+    smalls = sorted(s for s in all_shapes
+                    if s.startswith(small_stem) and s[len(small_stem):].isdigit())
+    larges = sorted(s for s in all_shapes
+                    if s.startswith(large_stem) and s[len(large_stem):].isdigit())
+    return smalls + [base] + larges        # index order == physical size order
+
+def wheelNodeScaling(uievent, editor, wheel_direction):
+    if uievent.located.item is None:
+        return
+    node = hou.node(uievent.located.item.path())
+    all_shapes = editor.nodeShapes()
+    current = node.userData("nodeshape") or node.type().defaultShape() or "rect"
+    ladder = _size_ladder(_family_base(current, all_shapes), all_shapes)
+    if current not in ladder:
+        return                             # no size variants for this shape
+    i = ladder.index(current)
+    if wheel_direction == "down":          # down = bigger (toward large)
+        i = min(i + 1, len(ladder) - 1)
+    elif wheel_direction == "up":          # up = smaller
+        i = max(i - 1, 0)
+    node.setUserData("nodeshape", ladder[i])
 
 '''   
     cur_shape = s.userData("nodeshape")
@@ -393,17 +391,22 @@ def wheelChangeNodecolor(uievent, editor, wheel_direction):
     # its colors are default grey, orange, green, blue, pink, purple, red, black 
     #color_lib = [(0.6, 0.7, 0.77), (1,0.73,0), (0.14,0.67,.56), (.09,.37,.69), (.89, .41, .76), (0.58,.21,.47), (0.8,.02,0.02), (0,0,0)]
     # its colors are default grey, orange, green, blue, pink, red
-    color_lib = [(0.6, 0.7, 0.77), (1,0.73,0), (0.14,0.67,.56), (.09,.37,.69), (.89, .41, .76), (0.8,.02,0.02)]
+    color_lib = [(1,0.73,0), (0.14,0.67,.56), (.09,.37,.69), (.89, .41, .76), (0.8,.02,0.02)]
+    color_default =  (0.8, 0.8, 0.8)
     if uievent.located.item != None:
         node = hou.node(uievent.located.item.path())
         #nodecolor = node.color()
         nodecolor = tuple(round(c, 2) for c in node.color().rgb())
         index = color_lib.index(nodecolor) if nodecolor in color_lib else -1
-        if wheel_direction == "down":         
+        if wheel_direction == "up":         
             new_index = (index+1) % len(color_lib)
-        elif wheel_direction == "up":
-            new_index = (index-1) % len(color_lib)
-        new_color = color_lib[new_index]
+            new_color = color_lib[new_index]
+        elif wheel_direction == "down":
+            # always set default color
+            new_color = color_default
+            # or go into reverse order
+            # new_index = (index-1) % len(color_lib)
+        #new_color = color_lib[new_index]
         node.setColor(hou.Color(new_color))
 
 
