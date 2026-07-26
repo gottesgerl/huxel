@@ -358,9 +358,9 @@ def _size_ladder(base, all_shapes):
     return smalls + [base] + larges        # index order == physical size order
 
 def wheelNodeScaling(uievent, editor, wheel_direction):
-    if uievent.located.item is None:
-        return
-    node = hou.node(uievent.located.item.path())
+    item = uievent.located.item
+    if not isinstance(item, hou.Node):     return    # wheel was over a wire / dot / empty - not a node
+    node = item
     all_shapes = editor.nodeShapes()
     current = node.userData("nodeshape") or node.type().defaultShape() or "rect"
     ladder = _size_ladder(_family_base(current, all_shapes), all_shapes)
