@@ -234,6 +234,23 @@ def handle_SOPnull(editor, node):
         centerNode(editor, target)
         setSelection(editor, target)
 
+def handle_SOPmerge(editor, node):
+    conns = node.inputConnections()
+    if len(conns) < 2:        return
+    wired = []
+    for c in conns:
+        src  = c.inputNode()
+        item = c.inputItem()
+        if src is None or item is None:  return
+        wired.append((c.inputIndex(), src, item, c.outputIndex()))
+    current = [w[1:] for w in sorted(wired, key=lambda w: w[0])]
+    target  = [w[1:] for w in sorted(wired, key=lambda w: (w[1].position()[0], -w[1].position()[1]))]
+    # do nothing if order is ok
+    if current == target: return
+    with hou.undos.group("Reorder Merge Inputs"):
+        for i, (_src, item, out_idx) in enumerate(target):
+            node.setInput(i, item, out_idx)
+    
 def handle_SOPmaterial(editor, node):
     # Material 
     # go to dependent nodes    
@@ -505,6 +522,9 @@ class LmbMouseHandler(ng.NodeMouseHandler):
 
                     if type == hou.nodeType(hou.sopNodeTypeCategory(), "null"):
                         handle_SOPnull(editor, node)
+
+                    if type == hou.nodeType(hou.sopNodeTypeCategory(), "merge"):
+                        handle_SOPmerge(editor, node)
                         
                     if type == hou.nodeType(hou.sopNodeTypeCategory(), "switch"):
                         handle_SOPswitch(uievent, editor, node)
