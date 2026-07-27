@@ -278,6 +278,104 @@ def handle_SOPswitch(uievent, editor, node):
             new_input = (input-1)%(len(node.inputs()))
         node.parm("input").set(new_input)
 
+# -------------------------------------------VISUALIZER TOGGLE
+
+# fixed visualizer presets for special attributes
+NEW_ATTR_VIS_PRESETS = {
+    "Cd":    {"type": "vis_color"},
+    "noise": {"type": "vis_color"},
+    "speed": {"type": "vis_marker", "style": "vector", "unitlength": 0.5, "arrowheads": 1},
+    "v":     {"type": "vis_marker", "style": "vector"},
+    "N":     {"type": "vis_marker", "style": "vector", "normalize": 1},
+    "mask":  {"type": "vis_marker", "style": "text"},
+    "orient": {"type": "vis_marker", "style": "axes", "lengthscale": 0.1},
+}
+
+def _vis_spec(geo, attrib):
+    try: attr = geo.findPointAttrib(attrib)
+    except hou.Error:  attr = None
+    vtype, parms = "vis_marker", {"style": "text"}          # fallback: value as text
+    if attr is not None:
+        qual = ""
+        try: qual = (attr.qualifier() or "").lower()            # 'color','vector','normal','point',''
+        except (AttributeError, hou.Error): pass
+        is_float3 = (attr.dataType() == hou.attribData.Float and attr.size() == 3)
+        if qual == "color" or attrib == "Cd":
+            vtype, parms = "vis_color", {}                  # surface tint by color
+        elif qual in ("vector", "normal", "point") or is_float3:
+            vtype, parms = "vis_marker", {"style": "vector"}  # arrows
+    # --- name preset overrides on top ---
+    preset = dict(NEW_ATTR_VIS_PRESETS.get(attrib, {}))
+    vtype = preset.pop("type", vtype)
+    parms.update(preset)
+    return vtype, parms
+
+
+def _geo_attribs(geo):
+    # collect all attributes
+    keys = set()
+    if geo is None:
+        return keys
+    for cls, attribs in (("point",  geo.pointAttribs()), 
+                         ("vertex", geo.vertexAttribs()),
+                         ("prim",   geo.primAttribs()),
+                         ("detail", geo.globalAttribs())):
+        for a in attribs:
+            keys.add((cls, a.name()))
+    return keys
+
+def _marker_style(geo, attrib):
+    # find best visualization style
+    style = "marker"
+    try:
+        a = geo.findPointAttrib(attrib)
+    except hou.Error:
+        a = None
+    if a is not None:
+        if attrib == "Cd":      style = "color"
+        elif a.size() == 3:     style = "vector"
+    return style
+
+def handle_newAttribVis(editor, node):
+    # visualize toggle
+    VIS_TAG = "huxel_newattr__"
+    cat = hou.viewportVisualizerCategory.Node
+    if not isinstance(node, hou.SopNode):   return
+    # Toggle off
+    displayed = node.isDisplayFlagSet()
+    existing = [v for v in hou.viewportVisualizers.visualizers(cat, node=node) if v.name().startswith(VIS_TAG)]
+    if existing and displayed:
+        for v in existing: v.destroy()
+        return
+    # Toggle on (+kill old one)
+    for v in existing: v.destroy()
+    try:   cur = _geo_attribs(node.geometry())
+    except hou.Error:   return 
+    incoming = set()
+    for input in node.inputs(): incoming |= _geo_attribs(input.geometry())
+    new_keys = sorted(cur - incoming)
+    new_points = [name for cls, name in new_keys if cls == "point"]
+    other      = [(cls, name) for cls, name in new_keys if cls != "point"]
+    if not new_points: return
+    geo = node.geometry()
+    vtype = hou.viewportVisualizers.type("vis_marker")
+    with hou.undos.group("Visualize New Attributes"):
+        for name in new_points:
+            vtype, parms = _vis_spec(geo, name)
+            vis = hou.viewportVisualizers.createVisualizer(
+                hou.viewportVisualizers.type(vtype), cat, node)
+            vis.setName(VIS_TAG + name)
+            vis.setLabel("new: " + name)
+            vis.setParm("attrib", name)
+            for pname, pval in parms.items():
+                try: vis.setParm(pname, pval)
+                except hou.Error:   pass
+            vis.setIsActive(True)
+    try: setDisplayFlags(editor, node)
+    except (NameError, hou.Error):
+        try: node.setDisplayFlag(True)
+        except hou.Error: pass    
+
 def create_geo_node(uievent, editor, jump=1):
     #create a geo node and jumps into
     newgeo = editor.pwd().createNode("geo")
@@ -307,7 +405,6 @@ def handle_LOPsopImport(editor, node):
 
 
 #-------------------------------------------MOUSE WHEEL functions
-
 
 
 def wheelDiving(uievent, editor, wheel_direction):
@@ -373,26 +470,14 @@ def wheelNodeScaling(uievent, editor, wheel_direction):
         i = max(i - 1, 0)
     node.setUserData("nodeshape", ladder[i])
 
-'''   
-    cur_shape = s.userData("nodeshape")
-
-
-    #setting back to default color and shape
-    if (cur_color == vis_color) and (cur_shape == vis_shape):
-        counter_devis += 1
-        default_color = s.type().defaultColor()
-        default_shape = s.type().defaultShape()
-        s.setColor(default_color)
-        s.setUserData("nodeshape", default_shape)
-'''
-
-
 def wheelChangeNodeshape(uievent, editor, wheel_direction):
     # change node shapes
     shape_lib = ["rect", "circle", "null"]
     #all_shapes = editor.nodeShapes()
     if uievent.located.item != None:
-        node = hou.node(uievent.located.item.path())
+        item = uievent.located.item
+        if not isinstance(item, hou.Node):     return    # wheel was over a wire / dot / empty - not a node
+        node = item
         nodeshape = node.userData("nodeshape")
         index = shape_lib.index(nodeshape) if nodeshape in shape_lib else -1
         if wheel_direction == "down": 
@@ -508,36 +593,42 @@ class LmbMouseHandler(ng.NodeMouseHandler):
                         if not uievent.modifierstate.shift and not uievent.modifierstate.ctrl and not uievent.modifierstate.alt:
                             if context == "Object":     create_geo_node(uievent, editor)
                             if context == "Vop":        jump_from_material_to_SOP(editor) 
-
-                            
-                           
-                            
+                              
                  #-------------------------------------------double clicking a NODE
                 else:
                     node =  uievent.selected.item
-                    type = node.type()
+                    if not isinstance(node, hou.Node): pass
                     
-                    if type == hou.nodeType(hou.sopNodeTypeCategory(), "object_merge"):                        
-                        handle_SOPobjectMerge(editor, node)
+                    #------------------------------------------- double clicking over nodes
+                    elif not uievent.modifierstate.ctrl and not uievent.modifierstate.shift and not uievent.modifierstate.alt:
+                        type = node.type()
 
-                    if type == hou.nodeType(hou.sopNodeTypeCategory(), "null"):
-                        handle_SOPnull(editor, node)
+                        if type == hou.nodeType(hou.sopNodeTypeCategory(), "object_merge"):                        
+                            handle_SOPobjectMerge(editor, node)
 
-                    if type == hou.nodeType(hou.sopNodeTypeCategory(), "merge"):
-                        handle_SOPmerge(editor, node)
-                        
-                    if type == hou.nodeType(hou.sopNodeTypeCategory(), "switch"):
-                        handle_SOPswitch(uievent, editor, node)
+                        if type == hou.nodeType(hou.sopNodeTypeCategory(), "null"):
+                            handle_SOPnull(editor, node)
 
-                    if type == hou.nodeType(hou.sopNodeTypeCategory(), "material"):
-                        handle_SOPmaterial(editor, node)
+                        if type == hou.nodeType(hou.sopNodeTypeCategory(), "merge"):
+                            handle_SOPmerge(editor, node)
+                            
+                        if type == hou.nodeType(hou.sopNodeTypeCategory(), "switch"):
+                            handle_SOPswitch(uievent, editor, node)
 
-                    #different materials types
-                    if type.name() in ("subnetconnector", "redshift_material", "redshift_usd_material"):
-                        jump_from_material_to_SOP(editor, net=None)  
+                        if type == hou.nodeType(hou.sopNodeTypeCategory(), "material"):
+                            handle_SOPmaterial(editor, node)
 
-                    if type == hou.nodeType(hou.lopNodeTypeCategory(), "sopimport"):
-                        handle_LOPsopImport(editor, node)    
+                        #different materials types
+                        if type.name() in ("subnetconnector", "redshift_material", "redshift_usd_material"):
+                            jump_from_material_to_SOP(editor, net=None)  
+
+                        if type == hou.nodeType(hou.lopNodeTypeCategory(), "sopimport"):
+                            handle_LOPsopImport(editor, node)  
+
+                    #-------------------------------------------CTRL + double clicking over node: VISUALIZER TOGGLE
+                    elif uievent.modifierstate.ctrl and not uievent.modifierstate.shift and not uievent.modifierstate.alt:
+                        handle_newAttribVis(editor, node) 
+                        return None
         
         #------------------------------------------- HANDLING OVERLAYS AND SPECIFIC CASES      
                     
